@@ -1,1 +1,1905 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RF Analytics v2 — Renda Fixa Brasil</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06101a;--surface:#0c1a27;--surface2:#112030;--surface3:#162840;
+  --border:#1c3a52;--border2:#244a66;
+  --accent:#00e5a0;--accent2:#0099ff;--accent3:#ff6b35;--accent4:#ffd93d;
+  --text:#dff0f8;--text2:#7ab8d4;--text3:#3a6a8a;--text4:#264a66;
+  --danger:#ff4455;--warn:#ffaa00;
+  --buy-strong:#00ff88;--buy:#00e5a0;--neutral:#ffd93d;--sell:#ff4455;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+  --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(6,16,26,0.97);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-hex{width:34px;height:34px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--bg);font-family:var(--mono)}
+.logo-text{font-size:17px;font-weight:800;letter-spacing:-.5px}
+.logo-text span{color:var(--accent)}
+.hstats{display:flex;gap:20px}
+.hstat{display:flex;flex-direction:column;align-items:flex-end;cursor:pointer;position:relative}
+.hstat-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.2px}
+.hstat-val{font-size:14px;font-family:var(--mono);font-weight:700;color:var(--accent)}
+.hstat-val.blue{color:var(--accent2)}.hstat-val.red{color:var(--danger)}.hstat-val.yellow{color:var(--accent4)}
+.hstat-delta{font-size:9px;font-family:var(--mono);color:var(--text3);margin-top:1px}
+.hstat-delta.up{color:var(--accent)}.hstat-delta.dn{color:var(--danger)}
+
+/* ── TABS ── */
+.tab-nav{position:sticky;top:61px;z-index:90;display:flex;padding:0 28px;border-bottom:1px solid var(--border);background:var(--surface);gap:2px;overflow-x:auto}
+.tab-btn{padding:13px 18px;background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.3px;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--text2)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── MAIN ── */
+main{position:relative;z-index:5;padding:22px 28px;max-width:1440px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ── CARDS ROW ── */
+.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+.card.blue::before{background:var(--accent2)}.card.orange::before{background:var(--accent3)}.card.yellow::before{background:var(--accent4)}.card.red::before{background:var(--danger)}
+.card-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.card-val{font-size:24px;font-family:var(--mono);font-weight:700;color:var(--text);line-height:1}
+.card-sub{font-size:10px;color:var(--text3);margin-top:5px;font-family:var(--mono)}
+.card-sub.up{color:var(--accent)}.card-sub.dn{color:var(--danger)}
+
+/* ── CHART BOX ── */
+.chart-grid{display:grid;gap:14px;margin-bottom:18px}
+.chart-grid.g2{grid-template-columns:1fr 1fr}.chart-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.chart-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.chart-box.full{grid-column:1/-1}
+.chart-title{font-size:11px;font-family:var(--mono);color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chart-title .info-icon{cursor:pointer;color:var(--text3);font-size:13px;transition:color .2s}.chart-title .info-icon:hover{color:var(--accent2)}
+.chart-wrap{position:relative}.chart-wrap.h200{height:200px}.chart-wrap.h260{height:260px}.chart-wrap.h300{height:300px}.chart-wrap.h340{height:340px}
+
+/* ── BADGE ── */
+.badge{font-size:9px;padding:2px 7px;border-radius:20px;font-family:var(--mono);font-weight:700;letter-spacing:.5px}
+.badge.green{background:rgba(0,229,160,.12);color:var(--accent);border:1px solid rgba(0,229,160,.2)}
+.badge.blue{background:rgba(0,153,255,.12);color:var(--accent2);border:1px solid rgba(0,153,255,.2)}
+.badge.yellow{background:rgba(255,217,61,.12);color:var(--accent4);border:1px solid rgba(255,217,61,.2)}
+.badge.red{background:rgba(255,68,85,.12);color:var(--danger);border:1px solid rgba(255,68,85,.2)}
+.badge.orange{background:rgba(255,107,53,.12);color:var(--accent3);border:1px solid rgba(255,107,53,.2)}
+
+/* ── SIGNAL BADGES ── */
+.sig{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.4px;cursor:pointer;transition:opacity .2s}
+.sig:hover{opacity:.8}
+.sig.BUY_STRONG{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.sig.BUY{background:rgba(0,229,160,.12);color:var(--accent);border:1px solid rgba(0,229,160,.25)}
+.sig.NEUTRAL{background:rgba(255,217,61,.1);color:var(--accent4);border:1px solid rgba(255,217,61,.2)}
+.sig.SELL{background:rgba(255,68,85,.12);color:var(--danger);border:1px solid rgba(255,68,85,.2)}
+
+/* ── CONTROLS ── */
+.ctrl-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.ctrl-grp{display:flex;gap:3px}
+.ctrl-btn{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ctrl-btn:hover,.ctrl-btn.active{background:rgba(0,229,160,.1);border-color:var(--accent);color:var(--accent)}
+.ctrl-btn.blue.active{background:rgba(0,153,255,.1);border-color:var(--accent2);color:var(--accent2)}
+.ctrl-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);padding:5px 0;white-space:nowrap}
+.ctrl-sel{padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;cursor:pointer;outline:none}
+.ctrl-input{padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
+.ctrl-input:focus{border-color:var(--accent)}
+
+/* ── DATA TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.tbl th{text-align:left;padding:7px 10px;color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+.tbl th .info-icon{cursor:pointer;margin-left:4px;color:var(--text4);transition:color .2s}.tbl th .info-icon:hover{color:var(--accent2)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(28,58,82,.4);color:var(--text2);white-space:nowrap;vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,.018);cursor:pointer}
+.tbl td.g{color:var(--accent);font-weight:700}.tbl td.b{color:var(--accent2)}.tbl td.y{color:var(--accent4)}.tbl td.r{color:var(--danger)}.tbl td.w{color:var(--text);font-weight:700}.tbl td.o{color:var(--accent3)}
+
+/* ── PERCENTILE BAR ── */
+.pct-bar{display:flex;align-items:center;gap:6px}
+.pct-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.pct-fill{height:100%;border-radius:3px;transition:width .3s}
+.pct-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);min-width:28px;text-align:right}
+
+/* ── CALC PANELS ── */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.calc-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.calc-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:14px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.cf{margin-bottom:12px}
+.cf label{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.cf input,.cf select{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .2s}
+.cf input:focus,.cf select:focus{border-color:var(--accent)}
+.calc-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:4px;color:var(--bg);font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.calc-btn:hover{opacity:.85}
+.calc-res{margin-top:14px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;display:none}
+.cr-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(28,58,82,.4);font-family:var(--mono);font-size:11px}
+.cr-row:last-child{border-bottom:none}
+.cr-row .lbl{color:var(--text3)}.cr-row .val{color:var(--accent);font-weight:700}
+.cr-row .val.w{color:var(--text)}.cr-row .val.b{color:var(--accent2)}.cr-row .val.y{color:var(--accent4)}.cr-row .val.r{color:var(--danger)}
+
+/* ── ALERT ── */
+.alert-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);border-left:3px solid var(--accent)}
+.alert-item.warn{border-left-color:var(--accent4)}.alert-item.danger{border-left-color:var(--danger)}.alert-item.info{border-left-color:var(--accent2)}
+.alert-content{flex:1}
+.alert-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.alert-desc{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.alert-time{font-size:9px;color:var(--text3);font-family:var(--mono)}
+
+/* ── TOOLTIP POPUP ── */
+.tt-hover{position:absolute;z-index:999;background:var(--surface2);border:1px solid var(--accent2);border-radius:6px;padding:8px 11px;font-family:var(--mono);font-size:10px;color:var(--text2);max-width:240px;pointer-events:none;opacity:0;transition:opacity .15s;line-height:1.5}
+.tt-hover.visible{opacity:1}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:28px;max-width:480px;width:90%;position:relative;transform:translateY(10px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-title{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.modal-body{font-size:12px;color:var(--text2);line-height:1.8;font-family:var(--mono)}
+.modal-body strong{color:var(--text)}
+.modal-body .formula{background:var(--surface2);border-left:3px solid var(--accent);padding:8px 12px;margin:10px 0;border-radius:0 4px 4px 0;font-size:11px;color:var(--accent4)}
+
+/* ── SOURCE BAR ── */
+.src-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(0,153,255,.05);border:1px solid rgba(0,153,255,.12);border-radius:6px;margin-bottom:18px;font-family:var(--mono);font-size:10px;color:var(--text3)}
+.src-bar .dot{width:6px;height:6px;border-radius:50%;background:var(--accent4);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── SIM RESULT CARDS ── */
+.sim-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:14px}
+.sim-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:11px;text-align:center}
+.sim-card-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.sim-card-val{font-size:18px;font-family:var(--mono);font-weight:700;color:var(--accent)}
+.sim-card-val.b{color:var(--accent2)}.sim-card-val.y{color:var(--accent4)}.sim-card-val.o{color:var(--accent3)}.sim-card-val.r{color:var(--danger)}
+
+/* ── HEATMAP ── */
+.hmap-grid{display:grid;gap:2px}
+.hmap-cell{padding:8px 4px;border-radius:3px;text-align:center;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;transition:transform .1s}
+.hmap-cell:hover{transform:scale(1.06)}
+.hmap-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);text-align:center;padding:3px}
+
+/* ── MARKING-TO-MARKET TABLE ── */
+.mtm-scenario{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px}
+.mtm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mtm-title{font-size:11px;font-weight:700;color:var(--text);font-family:var(--mono)}
+.mtm-gain{font-size:16px;font-family:var(--mono);font-weight:700}
+.mtm-gain.pos{color:var(--accent)}.mtm-gain.neg{color:var(--danger)}
+.mtm-details{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mtm-det{font-size:10px;font-family:var(--mono)}
+.mtm-det .k{color:var(--text3);display:block;font-size:9px;margin-bottom:2px}
+.mtm-det .v{color:var(--text2);font-weight:700}
+
+/* ── LOADING / REAL DATA ── */
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.hstat-val.shimmer{color:var(--text3) !important}
+.src-bar.real .dot{background:var(--accent);animation:none}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── RESP ── */
+@media(max-width:960px){
+  .chart-grid.g2,.chart-grid.g3,.calc-grid{grid-template-columns:1fr}
+  .hstats{display:none}
+  .cards-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- HOVER TOOLTIP -->
+<div class="tt-hover" id="tt-hover"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-hex">RF</div>
+    <div class="logo-text">RF<span>Analytics</span></div>
+  </div>
+  <div class="hstats">
+    <div class="hstat" onclick="openInfo('selic')">
+      <span class="hstat-lbl">SELIC Diária</span>
+      <span class="hstat-val" id="h-selic-val">—</span>
+      <span class="hstat-delta" id="h-selic-delta">carregando…</span>
+    </div>
+    <div class="hstat" onclick="openInfo('ipca')">
+      <span class="hstat-lbl">IPCA 12m</span>
+      <span class="hstat-val blue" id="h-ipca-val">—</span>
+      <span class="hstat-delta up" id="h-ipca-delta">carregando…</span>
+    </div>
+    <div class="hstat" onclick="openInfo('cdi')">
+      <span class="hstat-lbl">CDI Diário</span>
+      <span class="hstat-val" id="h-cdi-val">—</span>
+      <span class="hstat-delta">≈ SELIC – 0,10%</span>
+    </div>
+    <div class="hstat" onclick="openInfo('curvaIncl')">
+      <span class="hstat-lbl">Var. SELIC 21d</span>
+      <span class="hstat-val yellow" id="h-incl-val">—</span>
+      <span class="hstat-delta up" id="h-incl-delta">carregando…</span>
+    </div>
+    <div class="hstat" onclick="openInfo('cambio')">
+      <span class="hstat-lbl">Câmbio R$/US$</span>
+      <span class="hstat-val red" id="h-cambio-val">—</span>
+      <span class="hstat-delta dn" id="h-cambio-delta">carregando…</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-lbl">Ref. BCB</span>
+      <span class="hstat-val blue" id="h-date">—</span>
+      <span class="hstat-delta" id="h-date-delta">carregando…</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('curvas',this)">📈 Curvas de Juros</button>
+  <button class="tab-btn" onclick="switchTab('titulos',this)">🏛️ Títulos & Sinais</button>
+  <button class="tab-btn" onclick="switchTab('marcacao',this)">💰 Marcação a Mercado</button>
+  <button class="tab-btn" onclick="switchTab('correlacoes',this)">🔗 Correlações</button>
+  <button class="tab-btn" onclick="switchTab('calculadora',this)">🧮 Calculadora</button>
+  <button class="tab-btn" onclick="switchTab('simulacoes',this)">⚗️ Simulações</button>
+  <button class="tab-btn" onclick="switchTab('alertas',this)">🔔 Alertas</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     ABA 1 — CURVAS DE JUROS
+═══════════════════════════════════════════ -->
+<div id="tab-curvas" class="tab-panel active">
+  <div class="src-bar">
+    <div class="dot"></div>
+    <span>Dados simulados — estrutura pronta para integração ANBIMA (ETTJ) e B3 (DI Futuro)</span>
+    <span style="margin-left:auto;color:var(--accent2)">Ref: <span id="curva-ref">—</span></span>
+  </div>
+
+  <div class="cards-row">
+    <div class="card" onclick="openInfo('ettj')">
+      <div class="card-lbl">DI Jan/2026 <span class="info-icon">ℹ</span></div>
+      <div class="card-val">10,78%</div>
+      <div class="card-sub up">▲ +3bp · curto prazo</div>
+    </div>
+    <div class="card blue" onclick="openInfo('ettj')">
+      <div class="card-lbl">DI Jan/2027</div>
+      <div class="card-val">10,95%</div>
+      <div class="card-sub up">▲ +5bp · médio prazo</div>
+    </div>
+    <div class="card orange" onclick="openInfo('ettj')">
+      <div class="card-lbl">DI Jan/2029</div>
+      <div class="card-val">11,28%</div>
+      <div class="card-sub up">▲ +4bp</div>
+    </div>
+    <div class="card yellow" onclick="openInfo('ettj')">
+      <div class="card-lbl">DI Jan/2031</div>
+      <div class="card-val">11,45%</div>
+      <div class="card-sub dn">▼ -1bp · longo prazo</div>
+    </div>
+    <div class="card" onclick="openInfo('inclinacao')">
+      <div class="card-lbl">Inclinação 2026-2031 <span class="info-icon">ℹ</span></div>
+      <div class="card-val">+67bp</div>
+      <div class="card-sub up">curva normal</div>
+    </div>
+    <div class="card blue" onclick="openInfo('inflImpl')">
+      <div class="card-lbl">Inflação Implícita 5A <span class="info-icon">ℹ</span></div>
+      <div class="card-val">5,63%</div>
+      <div class="card-sub">NTN-B vs LTN</div>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-lbl">Curva:</span>
+    <div class="ctrl-grp" id="curva-tipo-grp">
+      <button class="ctrl-btn active" onclick="setCurvaTipo(this,'pre')">Pré-fixado (DI/LTN/NTN-F)</button>
+      <button class="ctrl-btn blue" onclick="setCurvaTipo(this,'ipca')">IPCA+ (NTN-B)</button>
+      <button class="ctrl-btn" onclick="setCurvaTipo(this,'ambas')">Ambas</button>
+    </div>
+    <span class="ctrl-lbl" style="margin-left:12px">Período histórico:</span>
+    <div class="ctrl-grp" id="curva-periodo-grp">
+      <button class="ctrl-btn active" onclick="setCurvaPeriodo(this,'1m')">1M</button>
+      <button class="ctrl-btn" onclick="setCurvaPeriodo(this,'3m')">3M</button>
+      <button class="ctrl-btn" onclick="setCurvaPeriodo(this,'6m')">6M</button>
+      <button class="ctrl-btn" onclick="setCurvaPeriodo(this,'1a')">1A</button>
+      <button class="ctrl-btn" onclick="setCurvaPeriodo(this,'3a')">3A</button>
+    </div>
+    <button class="ctrl-btn" style="margin-left:8px;background:rgba(0,229,160,.08);border-color:rgba(0,229,160,.3);color:var(--accent)" onclick="animateCurve()">▶ Animar</button>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box full">
+      <div class="chart-title">
+        ETTJ — Estrutura a Termo de Taxas de Juros
+        <span class="info-icon" onclick="openInfo('ettj')">ℹ</span>
+        <span class="badge green">Hoje</span>
+        <span class="badge blue" style="margin-left:2px">1M atrás</span>
+        <span class="badge orange" style="margin-left:2px">3M atrás</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text3)" id="ettj-subtitle">Pré-fixado · DI Futuro / LTN / NTN-F</span>
+      </div>
+      <div class="chart-wrap h300">
+        <canvas id="chartETTJ"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid g2">
+    <div class="chart-box">
+      <div class="chart-title">
+        Evolução Histórica por Vencimento
+        <span class="info-icon" onclick="openInfo('histCurva')">ℹ</span>
+      </div>
+      <div class="chart-wrap h260">
+        <canvas id="chartHistVenc"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">
+        Spread Longo–Curto (Inclinação)
+        <span class="info-icon" onclick="openInfo('inclinacao')">ℹ</span>
+        <span class="badge blue" style="margin-left:auto">2031 – 2026</span>
+      </div>
+      <div class="chart-wrap h260">
+        <canvas id="chartSpread"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 2 — TÍTULOS & SINAIS
+═══════════════════════════════════════════ -->
+<div id="tab-titulos" class="tab-panel">
+  <div class="src-bar">
+    <div class="dot"></div>
+    <span>Marcação a mercado ANBIMA · NTN-B, NTN-F, LTN, LFT · Sinais gerados por 4 critérios combinados</span>
+  </div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-lbl">Filtrar:</span>
+    <div class="ctrl-grp">
+      <button class="ctrl-btn active" onclick="filtrarTitulos(this,'todos')">Todos</button>
+      <button class="ctrl-btn" onclick="filtrarTitulos(this,'pre')">Pré-fixado</button>
+      <button class="ctrl-btn" onclick="filtrarTitulos(this,'ipca')">IPCA+</button>
+      <button class="ctrl-btn" onclick="filtrarTitulos(this,'lft')">Pós-fixado</button>
+    </div>
+    <span class="ctrl-lbl" style="margin-left:12px">Sinal:</span>
+    <div class="ctrl-grp">
+      <button class="ctrl-btn active" onclick="filtrarSinal(this,'')">Todos</button>
+      <button class="ctrl-btn" onclick="filtrarSinal(this,'BUY_STRONG')">Compra Forte</button>
+      <button class="ctrl-btn" onclick="filtrarSinal(this,'BUY')">Compra</button>
+      <button class="ctrl-btn" onclick="filtrarSinal(this,'SELL')">Venda</button>
+    </div>
+    <span class="ctrl-lbl" style="margin-left:auto;font-size:9px;color:var(--text4)">
+      <span class="info-icon" onclick="openInfo('sinais')" style="cursor:pointer;color:var(--accent2)">ℹ Como os sinais são calculados</span>
+    </span>
+  </div>
+
+  <div class="chart-box" style="margin-bottom:16px;overflow-x:auto">
+    <div class="chart-title">
+      Títulos Públicos — Taxas Indicativas & Sinais de Oportunidade
+      <span class="info-icon" onclick="openInfo('tabelaTitulos')">ℹ</span>
+    </div>
+    <table class="tbl" id="titulos-table">
+      <thead>
+        <tr>
+          <th>Título <span class="info-icon" onclick="openInfo('tipoTitulo')">ℹ</span></th>
+          <th>Vencimento</th>
+          <th>Tipo</th>
+          <th>Taxa Indicativa <span class="info-icon" onclick="openInfo('taxaIndicativa')">ℹ</span></th>
+          <th>Percentil Hist. <span class="info-icon" onclick="openInfo('percentilHist')">ℹ</span></th>
+          <th>Incl. Curva <span class="info-icon" onclick="openInfo('inclCurva')">ℹ</span></th>
+          <th>Spread/Meta <span class="info-icon" onclick="openInfo('spreadMeta')">ℹ</span></th>
+          <th>vs Pico <span class="info-icon" onclick="openInfo('vsPico')">ℹ</span></th>
+          <th>Duration <span class="info-icon" onclick="openInfo('duration')">ℹ</span></th>
+          <th>DV01 <span class="info-icon" onclick="openInfo('dv01')">ℹ</span></th>
+          <th>Sinal <span class="info-icon" onclick="openInfo('sinais')">ℹ</span></th>
+        </tr>
+      </thead>
+      <tbody id="titulos-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="chart-grid g2">
+    <div class="chart-box">
+      <div class="chart-title">NTN-B — Curva de Yields Reais por Vencimento <span class="info-icon" onclick="openInfo('yieldReal')">ℹ</span></div>
+      <div class="chart-wrap h260"><canvas id="chartNTNB"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Inflação Implícita Histórica <span class="info-icon" onclick="openInfo('inflImpl')">ℹ</span></div>
+      <div class="chart-wrap h260"><canvas id="chartInflImpl"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 3 — MARCAÇÃO A MERCADO
+═══════════════════════════════════════════ -->
+<div id="tab-marcacao" class="tab-panel">
+  <div class="src-bar">
+    <div class="dot"></div>
+    <span>Análise de ganhos por marcação a mercado — inversões de curva e picos de yield geram retornos extraordinários nos pré-fixados e IPCA+</span>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box full">
+      <div class="chart-title">
+        Como Funciona a Marcação a Mercado
+        <span class="info-icon" onclick="openInfo('marcacaoMercado')">ℹ</span>
+        <span class="badge yellow" style="margin-left:auto">Conceito fundamental</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:4px 0">
+        <div style="background:var(--surface2);border-radius:6px;padding:14px;border-left:3px solid var(--accent)">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">① Compra no pico</div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text2);line-height:1.7">Quando a taxa está em máxima histórica (percentil &gt;80%), o PU está baixo. Você compra o título com desconto.</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;padding:14px;border-left:3px solid var(--accent2)">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--accent2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">② Taxa cai</div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text2);line-height:1.7">Com queda da taxa de juros, o preço do título sobe na marcação a mercado. Relação inversa: <strong>taxa ↓ = PU ↑</strong></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;padding:14px;border-left:3px solid var(--accent4)">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--accent4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">③ Ganho duplo</div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text2);line-height:1.7">Você vende antes do vencimento com ganho de capital. Quanto maior a duration, maior o ganho para o mesmo choque de taxa.</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;padding:14px;border-left:3px solid var(--accent3)">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--accent3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">④ Risco oposto</div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text2);line-height:1.7">Se as taxas sobem após a compra, o PU cai. Por isso o timing importa — o dashboard sinaliza os melhores momentos.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-lbl">Filtrar cenários:</span>
+    <div class="ctrl-grp">
+      <button class="ctrl-btn active" onclick="filtrarMTM(this,'todos')">Todos</button>
+      <button class="ctrl-btn" onclick="filtrarMTM(this,'pre')">Pré-fixado</button>
+      <button class="ctrl-btn" onclick="filtrarMTM(this,'ipca')">IPCA+</button>
+      <button class="ctrl-btn" onclick="filtrarMTM(this,'positivo')">Ganho &gt; 15%</button>
+    </div>
+  </div>
+
+  <div id="mtm-scenarios-container"></div>
+
+  <div class="chart-grid g2" style="margin-top:4px">
+    <div class="chart-box">
+      <div class="chart-title">Yield NTN-B 2035 — Histórico com Pontos de Entrada <span class="info-icon" onclick="openInfo('pontosEntrada')">ℹ</span></div>
+      <div class="chart-wrap h260"><canvas id="chartMTMYield"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Retorno Acumulado — Compra no Pico vs Carregamento <span class="info-icon" onclick="openInfo('retornoAcum')">ℹ</span></div>
+      <div class="chart-wrap h260"><canvas id="chartMTMRetorno"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 4 — CORRELAÇÕES
+═══════════════════════════════════════════ -->
+<div id="tab-correlacoes" class="tab-panel">
+  <div class="src-bar"><div class="dot"></div><span>Matriz de correlação baseada em retornos diários</span></div>
+  <div class="ctrl-row">
+    <span class="ctrl-lbl">Janela:</span>
+    <div class="ctrl-grp" id="corr-win-grp">
+      <button class="ctrl-btn active" onclick="setCorrelWin(this,21)">21d</button>
+      <button class="ctrl-btn" onclick="setCorrelWin(this,63)">63d</button>
+      <button class="ctrl-btn" onclick="setCorrelWin(this,126)">126d</button>
+      <button class="ctrl-btn" onclick="setCorrelWin(this,252)">252d</button>
+    </div>
+  </div>
+  <div class="chart-grid g2">
+    <div class="chart-box">
+      <div class="chart-title">Matriz de Correlação <span class="info-icon" onclick="openInfo('correlacao')">ℹ</span></div>
+      <div id="heatmap-container"></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Correlação Rolante <span class="info-icon" onclick="openInfo('correlacaoRolante')">ℹ</span></div>
+      <div class="chart-wrap h260"><canvas id="chartCorrelRolante"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-title">Dispersão de Retornos Diários <span class="info-icon" onclick="openInfo('dispersao')">ℹ</span></div>
+    <div class="chart-wrap h260"><canvas id="chartScatter"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 5 — CALCULADORA
+═══════════════════════════════════════════ -->
+<div id="tab-calculadora" class="tab-panel">
+  <div class="calc-grid">
+    <div class="calc-panel">
+      <div class="calc-title">📐 Pré-fixado (LTN / NTN-F) <span class="info-icon" onclick="openInfo('calcPre')" style="cursor:pointer;color:var(--accent2);font-size:13px">ℹ</span></div>
+      <div class="cf"><label>Valor Nominal (R$)</label><input type="number" id="pre-vn" value="1000"></div>
+      <div class="cf"><label>Taxa Anual (%) <span class="info-icon" onclick="openInfo('taxaAnual')" style="cursor:pointer">ℹ</span></label><input type="number" id="pre-taxa" value="10.82" step="0.01"></div>
+      <div class="cf"><label>Data de Compra</label><input type="date" id="pre-compra"></div>
+      <div class="cf"><label>Data de Vencimento</label><input type="date" id="pre-venc"></div>
+      <div class="cf"><label>Convenção <span class="info-icon" onclick="openInfo('convencao')" style="cursor:pointer">ℹ</span></label>
+        <select id="pre-conv"><option value="252">Dias úteis (252)</option><option value="360">Dias corridos (360)</option><option value="365">Dias corridos (365)</option></select>
+      </div>
+      <button class="calc-btn" onclick="calcPre()">Calcular PU</button>
+      <div class="calc-res" id="pre-result"></div>
+    </div>
+
+    <div class="calc-panel">
+      <div class="calc-title">📊 IPCA+ (NTN-B) <span class="info-icon" onclick="openInfo('calcNTNB')" style="cursor:pointer;color:var(--accent2);font-size:13px">ℹ</span></div>
+      <div class="cf"><label>VNA Atual (R$) <span class="info-icon" onclick="openInfo('vna')" style="cursor:pointer">ℹ</span></label><input type="number" id="ntnb-vna" value="4563.82" step="0.01"></div>
+      <div class="cf"><label>Taxa Real Anual (%) <span class="info-icon" onclick="openInfo('taxaReal')" style="cursor:pointer">ℹ</span></label><input type="number" id="ntnb-taxa" value="5.91" step="0.01"></div>
+      <div class="cf"><label>Data de Compra</label><input type="date" id="ntnb-compra"></div>
+      <div class="cf"><label>Data de Vencimento</label><input type="date" id="ntnb-venc"></div>
+      <div class="cf"><label>Cupom Semestral (% a.a.) <span class="info-icon" onclick="openInfo('cupomNTNB')" style="cursor:pointer">ℹ</span></label><input type="number" id="ntnb-cupom" value="6" step="0.01"></div>
+      <button class="calc-btn" onclick="calcNTNB()">Calcular PU</button>
+      <div class="calc-res" id="ntnb-result"></div>
+    </div>
+
+    <div class="calc-panel">
+      <div class="calc-title">💰 CDI / LFT <span class="info-icon" onclick="openInfo('calcCDI')" style="cursor:pointer;color:var(--accent2);font-size:13px">ℹ</span></div>
+      <div class="cf"><label>Valor Investido (R$)</label><input type="number" id="cdi-val" value="10000"></div>
+      <div class="cf"><label>% do CDI <span class="info-icon" onclick="openInfo('pctCDI')" style="cursor:pointer">ℹ</span></label><input type="number" id="cdi-pct" value="100" step="0.5"></div>
+      <div class="cf"><label>CDI Anual (%)</label><input type="number" id="cdi-taxa" value="10.40" step="0.01"></div>
+      <div class="cf"><label>Prazo (dias úteis)</label><input type="number" id="cdi-dias" value="252"></div>
+      <div class="cf"><label>Alíquota IR <span class="info-icon" onclick="openInfo('irRegressivo')" style="cursor:pointer">ℹ</span></label>
+        <select id="cdi-ir"><option value="22.5">22,5% (até 180d)</option><option value="20">20% (181–360d)</option><option value="17.5" selected>17,5% (361–720d)</option><option value="15">15% (acima 720d)</option></select>
+      </div>
+      <button class="calc-btn" onclick="calcCDI()">Calcular Rendimento</button>
+      <div class="calc-res" id="cdi-result"></div>
+    </div>
+
+    <div class="calc-panel">
+      <div class="calc-title">📏 Duration & DV01 <span class="info-icon" onclick="openInfo('calcDuration')" style="cursor:pointer;color:var(--accent2);font-size:13px">ℹ</span></div>
+      <div class="cf"><label>Tipo</label>
+        <select id="dur-tipo"><option value="zero">Zero-Cupom (LTN)</option><option value="cupom">Com Cupom (NTN-F/B)</option></select>
+      </div>
+      <div class="cf"><label>PU (R$)</label><input type="number" id="dur-pu" value="932.45" step="0.01"></div>
+      <div class="cf"><label>Yield (% a.a.) <span class="info-icon" onclick="openInfo('yieldDur')" style="cursor:pointer">ℹ</span></label><input type="number" id="dur-yield" value="10.82" step="0.01"></div>
+      <div class="cf"><label>Prazo (anos)</label><input type="number" id="dur-prazo" value="2" step="0.25"></div>
+      <div class="cf"><label>Cupom (% a.a.) se aplicável</label><input type="number" id="dur-cupom" value="10" step="0.01"></div>
+      <button class="calc-btn" onclick="calcDuration()">Calcular</button>
+      <div class="calc-res" id="dur-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 6 — SIMULAÇÕES
+═══════════════════════════════════════════ -->
+<div id="tab-simulacoes" class="tab-panel">
+  <div class="chart-grid g2">
+    <div class="chart-box">
+      <div class="calc-title" style="font-size:11px;margin-bottom:14px;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">
+        Simulador de Choque de Taxa
+        <span class="info-icon" onclick="openInfo('simChoque')" style="cursor:pointer;color:var(--accent2);font-size:13px">ℹ</span>
+      </div>
+      <div class="cf"><label>PU Atual (R$)</label><input class="ctrl-input" type="number" id="sim-pu" value="100000" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none"></div>
+      <div class="cf"><label>Duration Modificada (anos) <span class="info-icon" onclick="openInfo('durMod')" style="cursor:pointer">ℹ</span></label><input class="ctrl-input" type="number" id="sim-dur" value="3.5" step="0.1" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none"></div>
+      <div class="cf">
+        <label>Choque de Taxa <span id="sim-choque-val" style="color:var(--accent)">+100bp</span> <span class="info-icon" onclick="openInfo('basisPoints')" style="cursor:pointer">ℹ</span></label>
+        <input type="range" id="sim-choque" min="-500" max="500" value="100" step="25" oninput="document.getElementById('sim-choque-val').textContent=(this.value>0?'+':'')+this.value+'bp';runSim()" style="width:100%;margin-top:6px;accent-color:var(--accent)">
+      </div>
+      <button class="calc-btn" onclick="runSim()">Calcular Impacto</button>
+      <div class="sim-cards" id="sim-results"></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Curva de Sensibilidade ao Choque <span class="info-icon" onclick="openInfo('sensibilidade')">ℹ</span></div>
+      <div class="chart-wrap h300"><canvas id="chartSens"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-box" style="margin-top:14px">
+    <div class="chart-title">Monte Carlo — Trajetórias Selic <span class="info-icon" onclick="openInfo('monteCarlo')">ℹ</span></div>
+    <div class="ctrl-row" style="margin-bottom:10px">
+      <span class="ctrl-lbl">Horizonte:</span>
+      <div class="ctrl-grp">
+        <button class="ctrl-btn active" onclick="setMCH(this,12)">12M</button>
+        <button class="ctrl-btn" onclick="setMCH(this,24)">24M</button>
+        <button class="ctrl-btn" onclick="setMCH(this,36)">36M</button>
+      </div>
+      <span class="ctrl-lbl" style="margin-left:12px">Trajetórias:</span>
+      <div class="ctrl-grp">
+        <button class="ctrl-btn active" onclick="setMCT(this,50)">50</button>
+        <button class="ctrl-btn" onclick="setMCT(this,200)">200</button>
+        <button class="ctrl-btn" onclick="setMCT(this,500)">500</button>
+      </div>
+      <button class="calc-btn" style="width:auto;padding:6px 18px;margin:0 0 0 10px" onclick="runMonteCarlo()">▶ Simular</button>
+    </div>
+    <div class="chart-wrap h300"><canvas id="chartMC"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 7 — ALERTAS
+═══════════════════════════════════════════ -->
+<div id="tab-alertas" class="tab-panel">
+  <div class="chart-grid g2">
+    <div class="chart-box">
+      <div class="chart-title">Configurar Alerta <span class="info-icon" onclick="openInfo('alertas')">ℹ</span></div>
+      <div class="cf"><label>Ativo / Indicador</label>
+        <select id="alerta-ativo" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none">
+          <option>DI Jan/2026</option><option>DI Jan/2027</option><option>DI Jan/2029</option><option>DI Jan/2031</option>
+          <option>NTN-B 2028</option><option>NTN-B 2035</option><option>NTN-B 2055</option>
+          <option>NTN-F 2033</option><option>SELIC Meta</option><option>IPCA 12m</option><option>Spread 2031-2026</option>
+        </select>
+      </div>
+      <div class="cf" style="margin-top:10px"><label>Condição</label>
+        <select id="alerta-cond" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none">
+          <option value="above">Acima de (%)</option><option value="below">Abaixo de (%)</option><option value="change">Variação diária &gt; (bp)</option>
+        </select>
+      </div>
+      <div class="cf" style="margin-top:10px"><label>Valor</label><input type="number" id="alerta-valor" value="11.50" step="0.01" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none"></div>
+      <div class="cf" style="margin-top:10px"><label>Nota (opcional)</label><input type="text" id="alerta-nota" placeholder="Ex: Gatilho para compra de NTN-B" style="width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none"></div>
+      <button class="calc-btn" onclick="addAlerta()" style="margin-top:12px">+ Adicionar Alerta</button>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Alertas Ativos <span class="badge green" id="alert-count">0</span></div>
+      <div id="alertas-lista"><div style="color:var(--text3);font-family:var(--mono);font-size:11px;text-align:center;padding:28px">Nenhum alerta configurado</div></div>
+    </div>
+  </div>
+  <div style="margin-top:4px">
+    <div style="font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">Histórico de Eventos</div>
+    <div id="alert-history"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const fmt = (n,d=2) => typeof n==='number' ? n.toFixed(d).replace('.',',') : n;
+const fmtBRL = n => 'R$ ' + n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const today = new Date();
+$('h-date').textContent = today.toLocaleDateString('pt-BR');
+$('curva-ref').textContent = today.toLocaleDateString('pt-BR') + ' 18h00';
+
+// Default dates
+['pre-compra','ntnb-compra'].forEach(id=>{if($(id)) $(id).value=today.toISOString().split('T')[0]});
+const v1=new Date(today); v1.setFullYear(v1.getFullYear()+2);
+const v2=new Date(today); v2.setFullYear(v2.getFullYear()+10);
+if($('pre-venc')) $('pre-venc').value=v1.toISOString().split('T')[0];
+if($('ntnb-venc')) $('ntnb-venc').value=v2.toISOString().split('T')[0];
+
+// Chart defaults
+Chart.defaults.color='#7ab8d4';
+Chart.defaults.font.family="'Space Mono',monospace";
+Chart.defaults.font.size=10;
+const gridOpts={color:'rgba(28,58,82,0.5)',drawBorder:false};
+
+// ════════════════════════════════════════════════════
+// TOOLTIP MODAL SYSTEM
+// ════════════════════════════════════════════════════
+const INFO = {
+  selic:{title:'SELIC — Taxa Básica de Juros',body:`A <strong>SELIC</strong> (Sistema Especial de Liquidação e Custódia) é a taxa básica de juros da economia brasileira, definida pelo COPOM a cada 45 dias.<br><br><strong>Por que importa:</strong> é a âncora de toda a curva de juros. Quando o COPOM sinaliza corte, os yields futuros caem — e os preços dos títulos pré-fixados e IPCA+ sobem, gerando ganhos na marcação a mercado.<div class="formula">Taxa SELIC ≈ CDI ≈ taxa overnight sem risco do Brasil</div>`},
+  ipca:{title:'IPCA — Inflação Oficial',body:`O <strong>IPCA</strong> (Índice de Preços ao Consumidor Amplo) é medido pelo IBGE mensalmente e é o índice usado pelo BCB para a meta de inflação.<br><br><strong>Meta atual:</strong> 3,00% ± 1,5 p.p. (intervalo: 1,5% – 4,5%)<br><br><strong>Relevância para renda fixa:</strong> Define o VNA das NTN-B e determina a rentabilidade real dos títulos IPCA+. IPCA alto com SELIC alta = oportunidade de compra em NTN-B.`},
+  cdi:{title:'CDI — Certificado de Depósito Interbancário',body:`O <strong>CDI</strong> é a taxa das operações de empréstimo de curtíssimo prazo entre bancos. Na prática, acompanha a SELIC com diferença mínima (0,10% a.a.).<br><br><strong>Fórmula diária:</strong><div class="formula">Fator Diário = (1 + CDI_anual)^(1/252)</div>Referência para LFT, CDBs e debêntures pós-fixadas.`},
+  curvaIncl:{title:'Inclinação da Curva de Juros',body:`A <strong>inclinação</strong> mede a diferença entre as taxas longas e curtas.<br><br>• <strong>Curva Normal (positiva):</strong> longos > curtos → expectativa de crescimento e inflação<br>• <strong>Curva Invertida (negativa):</strong> curtos > longos → mercado precifica queda de juros<br><br>Curva invertida historicamente precede cortes de SELIC — sinal de compra em pré-fixados longos.<div class="formula">Inclinação = Yield(2031) – Yield(2026)</div>`},
+  cambio:{title:'Câmbio BRL/USD',body:`O câmbio afeta a renda fixa indiretamente: depreciação do real pressiona inflação, que pressionaria a SELIC para cima — elevando yields e reduzindo preços dos títulos marcados a mercado.`},
+  ettj:{title:'ETTJ — Estrutura a Termo de Taxas de Juros',body:`A <strong>ETTJ</strong> (ou yield curve) mostra o nível de taxas para cada vencimento futuro. Publicada diariamente pela ANBIMA para títulos públicos.<br><br><strong>O que observar:</strong><br>• Forma da curva (normal, plana ou invertida)<br>• Deslocamento paralelo (todos os vértices sobem/caem junto)<br>• Torção (curta e longa se movem em direções opostas)<div class="formula">PU = VN / (1 + taxa)^(du/252)</div>`},
+  inclinacao:{title:'Inclinação da Curva (Spread)',body:`O <strong>spread longo-curto</strong> é um termômetro do ciclo de juros.<br><br>• Spread alto e crescente → mercado precifica alta de juros<br>• Spread caindo → expectativa de afrouxamento<br>• Inversão (spread negativo) → forte sinal de queda de juros à frente<br><br><strong>Estratégia:</strong> quando a curva está invertida ou muito plana, é o momento ideal para travar taxas longas em pré-fixados.`},
+  inflImpl:{title:'Inflação Implícita',body:`A <strong>inflação implícita</strong> é a inflação que o mercado precifica, calculada pelo diferencial entre títulos nominais (LTN/NTN-F) e reais (NTN-B).<div class="formula">Inflação Implícita ≈ Yield Nominal – Yield Real</div><strong>Interpretação:</strong> se a implícita está abaixo da inflação corrente, o mercado acredita em desinflação — sinal positivo para NTN-F pré. Se acima, NTN-B IPCA+ pode ser mais atrativa.`},
+  histCurva:{title:'Evolução Histórica por Vencimento',body:`Acompanhar a trajetória de cada vértice ao longo do tempo permite identificar:<br><br>• Máximas históricas (melhores momentos de compra)<br>• Tendência de alta/baixa de juros<br>• Momentos de compressão da curva (queda diferenciada nos longos)`},
+  sinais:{title:'Como os Sinais de Oportunidade São Calculados',body:`Cada título recebe uma pontuação combinando <strong>4 critérios</strong>:<br><br><strong>1. Percentil Histórico:</strong> yield atual vs últimos 252 dias. Acima do P80 = barato historicamente.<br><strong>2. Inclinação da Curva:</strong> curva normal com spread alto favorece longos pré-fixados.<br><strong>3. Spread Real (NTN-B):</strong> yield real acima de 5% a.a. é historicamente atrativo.<br><strong>4. Distância do Pico:</strong> se o yield está a menos de 50bp do pico recente, oportunidade maior.<br><br><div class="formula">Score = Σ(critérios cumpridos) / 4</div>• Score ≥ 0.75 → COMPRA FORTE<br>• Score ≥ 0.50 → COMPRA<br>• Score ≤ 0.25 → VENDA<br>• Demais → NEUTRO`},
+  tabelaTitulos:{title:'Tabela de Títulos Públicos',body:`Exibe as características e sinais de todos os títulos do Tesouro Direto, marcados a mercado diariamente pela ANBIMA.<br><br>Clique em qualquer linha para ver os detalhes do sinal de oportunidade para aquele título.`},
+  tipoTitulo:{title:'Tipos de Títulos Públicos',body:`• <strong>LTN:</strong> Letra do Tesouro Nacional — pré-fixado zero-cupom, ideal para marcação<br>• <strong>NTN-F:</strong> pré-fixado com cupons semestrais de 10% a.a.<br>• <strong>NTN-B:</strong> IPCA + taxa real, cupons de 6% a.a. sobre o VNA<br>• <strong>LFT:</strong> pós-fixado atrelado à SELIC, sem risco de marcação`},
+  taxaIndicativa:{title:'Taxa Indicativa ANBIMA',body:`A <strong>taxa indicativa</strong> é a referência de mercado para precificação dos títulos, calculada diariamente pela ANBIMA com base nos preços negociados e marcação a mercado.<br><br>É o yield que o investidor trava ao comprar o título hoje no Tesouro Direto ou no mercado secundário.`},
+  percentilHist:{title:'Percentil Histórico de Taxa',body:`Indica em que ponto da distribuição histórica o yield atual se encontra nos últimos 252 dias úteis (~1 ano).<div class="formula">Percentil 80 = yield atual está acima de 80% dos dias históricos</div><strong>Interpretação para compra:</strong><br>• P > 75: taxa alta historicamente → título barato → OPORTUNIDADE<br>• P 40–75: nível médio → NEUTRO<br>• P < 30: taxa baixa → título caro → CUIDADO`},
+  inclCurva:{title:'Sinal da Inclinação da Curva',body:`Indica se a forma atual da curva favorece a posição no título:<br><br>• <strong>Favorável:</strong> curva normal com spread positivo — longos tendem a cair mais quando houver afrouxamento<br>• <strong>Neutro:</strong> curva plana<br>• <strong>Desfavorável:</strong> curva invertida (taxa curta > longa) — risco de alta nos longos`},
+  spreadMeta:{title:'Spread Real vs Meta de Inflação (NTN-B)',body:`Para NTN-B, compara o yield real com a meta de inflação do BCB:<div class="formula">Spread = Yield Real NTN-B – Meta IPCA (3%)</div>• Spread > 2,5%: prêmio real alto → atrativo<br>• Spread > 3%: prêmio muito alto → COMPRA FORTE<br>Para LTN/NTN-F, compara com a SELIC esperada.`},
+  vsPico:{title:'Distância do Yield em Relação ao Pico Recente',body:`Mede o quanto o yield atual está abaixo do pico dos últimos 252 dias.<div class="formula">vs Pico = Pico_252d – Yield_atual (em bp)</div>• Próximo de zero (< 50bp): ainda no pico → excelente entrada<br>• Entre 50–150bp: abaixo do pico → entrada razoável<br>• Acima de 150bp: título já se valorizou muito`},
+  duration:{title:'Duration de Macaulay',body:`A <strong>duration</strong> mede o prazo médio ponderado dos fluxos de caixa de um título. É também a principal medida de sensibilidade a variações de taxa.<div class="formula">ΔPU ≈ –Duration_Mod × ΔYield × PU</div>Quanto maior a duration, maior o ganho (ou perda) para cada 1bp de variação de taxa.`},
+  dv01:{title:'DV01 — Dollar Value of 1 Basis Point',body:`O <strong>DV01</strong> mede a variação em reais no preço do título para uma queda de 1bp (0,01%) na taxa.<div class="formula">DV01 = PU × Duration_Modificada × 0,0001</div>Útil para dimensionar o risco e calcular posições de hedge.`},
+  yieldReal:{title:'Yield Real — Taxa de Juro Real',body:`Para NTN-B, a taxa de juro real é a remuneração acima da inflação (IPCA).<div class="formula">Retorno Total ≈ IPCA + Yield Real</div>Historicamente, yields reais acima de 5% a.a. no Brasil são considerados muito atrativos. Abaixo de 3,5% indicam prêmio insuficiente.`},
+  marcacaoMercado:{title:'Marcação a Mercado — O Conceito Central',body:`<strong>Marcação a mercado</strong> significa avaliar o título pelo seu preço atual de mercado, e não pelo valor de face.<br><br>A relação fundamental é:<div class="formula">Taxa ↑ → PU ↓ (título perde valor)<br>Taxa ↓ → PU ↑ (título ganha valor)</div>Para ganhar com marcação a mercado:<br><strong>1.</strong> Compre quando a taxa está alta (PU baixo)<br><strong>2.</strong> Venda quando a taxa cai (PU alto)<br><br>A magnitude do ganho depende da <strong>duration</strong>: títulos longos amplificam o movimento.`},
+  pontosEntrada:{title:'Pontos de Entrada — Identificação de Oportunidades',body:`O gráfico marca os momentos em que o yield atingiu máximas históricas (percentil > 75%). Esses foram pontos historicamente favoráveis para compra.<br><br>Combinado com a inversão da curva ou pico de yield, esses momentos geraram retornos extraordinários via marcação a mercado.`},
+  retornoAcum:{title:'Retorno Acumulado — Compra no Pico vs Carregamento',body:`Compara duas estratégias:<br><br><strong>Carregamento:</strong> compra e segura até o vencimento — recebe apenas a taxa contratada.<br><strong>Compra no pico + venda:</strong> compra na máxima de yield, vende quando a taxa cai — captura ganho de capital adicional à taxa contratada.<br><br>A diferença entre os dois mostra o "alfa" gerado pela estratégia de marcação a mercado.`},
+  calcPre:{title:'Calculadora Pré-fixado (LTN / NTN-F)',body:`Calcula o <strong>Preço Unitário (PU)</strong> de um título pré-fixado zero-cupom (LTN).<div class="formula">PU = VN / (1 + taxa)^(du/252)</div>Onde:<br>• VN = Valor Nominal (R$1.000 no Tesouro Direto)<br>• taxa = yield contratado (decimal)<br>• du = dias úteis até o vencimento`},
+  calcNTNB:{title:'Calculadora NTN-B (IPCA+)',body:`Calcula o PU da NTN-B como soma dos fluxos descontados pela taxa real:<div class="formula">PU = Σ [Cupom_i / (1 + taxa_sem)^i] + [VNA / (1 + taxa_sem)^n]</div>O cupom semestral padrão é de 6% a.a. sobre o VNA atualizado pelo IPCA.`},
+  calcCDI:{title:'Calculadora CDI / LFT',body:`Calcula o montante bruto e líquido de IR para aplicações pós-fixadas.<div class="formula">Montante = Capital × (1 + CDI_diário × %CDI)^dias_úteis</div>O IR é regressivo: quanto maior o prazo, menor a alíquota — vantagem dos títulos de longo prazo.`},
+  calcDuration:{title:'Calculadora Duration & DV01',body:`Calcula a Duration de Macaulay, Duration Modificada, Convexidade e DV01.<br><br>Para zero-cupom: Duration = Prazo<br>Para com cupom: média ponderada dos fluxos pelo tempo.<div class="formula">Duration_Mod = Duration_Mac / (1 + yield)</div>`},
+  vna:{title:'VNA — Valor Nominal Atualizado',body:`O <strong>VNA</strong> é o valor de face da NTN-B corrigido pelo IPCA acumulado desde maio/2000 (base R$1.000).<br><br>Atualizado diariamente pela ANBIMA com base na projeção de IPCA do mês corrente. O PU final = VNA × fator de deságio.`},
+  taxaReal:{title:'Taxa Real (NTN-B)',body:`É o juro acima da inflação que o título garante. Se a NTN-B paga IPCA + 5,91%, e o IPCA for 4,62%, o retorno total será aproximadamente 10,53% a.a.<div class="formula">Retorno Total ≈ (1 + IPCA) × (1 + Taxa_Real) – 1</div>`},
+  taxaAnual:{title:'Taxa de Juros Anual',body:`Para LTN e NTN-F, é a taxa pré-fixada anual na base 252 dias úteis (padrão brasileiro).<div class="formula">Fator = (1 + taxa)^(du/252)</div>Diferente da convenção 365/360 usada internacionalmente.`},
+  convencao:{title:'Convenção de Contagem de Dias',body:`• <strong>252 dias úteis:</strong> padrão do mercado brasileiro para títulos públicos, CDI e DI Futuro<br>• <strong>360 dias corridos:</strong> NDF, câmbio, alguns CDBs<br>• <strong>365 dias corridos:</strong> títulos internacionais<br><br>Usar a convenção errada resulta em erro sistemático no cálculo do PU.`},
+  cupomNTNB:{title:'Cupom Semestral NTN-B',body:`A NTN-B paga cupons semestrais de <strong>6% a.a.</strong> (equivalente a ~2,956% ao semestre) calculados sobre o VNA atualizado.<div class="formula">Cupom_sem = VNA × [(1,06)^0,5 – 1]</div>O cupom é reinvestido ou distribuído ao investidor a cada 6 meses.`},
+  pctCDI:{title:'% do CDI',body:`Indica quanto o título rende em relação ao CDI. CDB de banco grande costuma oferecer 90%–100% do CDI. Debêntures incentivadas podem oferecer mais.<br><br>100% do CDI = acompanha a SELIC sem desconto.`},
+  irRegressivo:{title:'Tabela Regressiva de IR',body:`Para renda fixa, o IR sobre os rendimentos é:<div class="formula">≤ 180 dias: 22,5%<br>181–360 dias: 20,0%<br>361–720 dias: 17,5%<br>> 720 dias: 15,0%</div>Importante: para NTN-B e LFT, o IR incide apenas sobre os rendimentos, não sobre o principal corrigido.`},
+  yieldDur:{title:'Yield para Cálculo de Duration',body:`O yield usado no denominador da Duration Modificada é a taxa interna de retorno (TIR) do título à data de cálculo — ou seja, a taxa indicativa ANBIMA.`},
+  simChoque:{title:'Simulador de Choque de Taxa',body:`Estima o impacto no valor do portfólio para choques de taxa em basis points.<div class="formula">ΔPU ≈ –Dur_Mod × ΔY × PU + ½ × Convex × ΔY² × PU</div>O segundo termo (convexidade) beneficia o investidor: títulos com alta convexidade perdem menos quando as taxas sobem e ganham mais quando caem.`},
+  durMod:{title:'Duration Modificada',body:`Mede a sensibilidade percentual do preço a variações de taxa:<div class="formula">Duration_Mod = Duration_Mac / (1 + yield/2)</div>• Duration_Mod = 3,5 anos → aumento de 1% na taxa reduz o PU em ~3,5%`},
+  basisPoints:{title:'Basis Points (bp)',body:`1 basis point = 0,01% = 0,0001 (decimal)<br><br>• 100bp = 1,00 ponto percentual<br>• O mercado usa bp para evitar ambiguidade: "taxa subiu 25 pontos" pode ser confuso; "subiu 25bp" é preciso.<div class="formula">100bp = 1% / 0,01 = 0,0001 decimal</div>`},
+  sensibilidade:{title:'Curva de Sensibilidade',body:`Mostra o novo valor do portfólio para cada nível de choque de taxa, de –500bp a +500bp.<br><br>A curvatura da linha (convexidade) mostra que os ganhos com queda de taxa são maiores que as perdas equivalentes com alta — assimetria favorável ao investidor.`},
+  monteCarlo:{title:'Simulação de Monte Carlo',body:`Gera N trajetórias aleatórias para a taxa SELIC usando um processo estocástico (caminhada aleatória com reversão à média).<br><br>Os percentis P10, P50 e P90 delimitam o intervalo de confiança das projeções. Útil para:<br>• Estressar o portfólio<br>• Definir horizontes de saída<br>• Calcular VaR da carteira`},
+  correlacao:{title:'Matriz de Correlação',body:`Mede a co-movimentação entre retornos diários dos ativos. Valores próximos de +1 indicam que os ativos se movem juntos; próximos de –1 indicam movimentos opostos.<br><br>Para renda fixa, correlação alta entre vértices da mesma curva é esperada — o que muda é a magnitude (títulos longos se movem mais que curtos).`},
+  correlacaoRolante:{title:'Correlação Rolante',body:`Calcula a correlação em janelas móveis, mostrando como a relação entre ativos muda ao longo do tempo.<br><br>Quedas abruptas na correlação podem indicar mudanças de regime (ex: mudança de humor de mercado, COPOM surpresa).`},
+  dispersao:{title:'Dispersão de Retornos Diários',body:`Gráfico de dispersão mostra cada dia como um ponto, com o retorno de um ativo no eixo X e outro no Y.<br><br>A inclinação da nuvem de pontos visualiza a correlação. Uma linha diagonal de 45° = correlação perfeita.`},
+  alertas:{title:'Sistema de Alertas',body:`Configure monitoramento automático de qualquer indicador.<br><br>Os alertas são verificados no carregamento da página. Em uma versão conectada à API da ANBIMA/B3, podem ser verificados em tempo real e enviar e-mail ou notificação push.`},
+};
+
+function openInfo(key) {
+  const info = INFO[key];
+  if(!info) return;
+  $('modal-title').textContent = info.title;
+  $('modal-body').innerHTML = info.body;
+  $('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if(!e || e.target===$('modal-overlay')) $('modal-overlay').classList.remove('open');
+}
+
+// Hover tooltip
+let ttTimer;
+document.querySelectorAll('.info-icon').forEach(el => {
+  el.addEventListener('mouseenter', function(e) {
+    const key = this.closest('[onclick]')?.getAttribute('onclick')?.match(/openInfo\('(\w+)'\)/)?.[1];
+    if(!key || !INFO[key]) return;
+    const tt = $('tt-hover');
+    tt.textContent = INFO[key].title + ' — clique para detalhes';
+    tt.style.left = (e.pageX+12)+'px';
+    tt.style.top = (e.pageY-8)+'px';
+    clearTimeout(ttTimer);
+    ttTimer = setTimeout(()=>tt.classList.add('visible'),200);
+  });
+  el.addEventListener('mouseleave', function() {
+    clearTimeout(ttTimer);
+    $('tt-hover').classList.remove('visible');
+  });
+  el.addEventListener('mousemove', function(e) {
+    const tt = $('tt-hover');
+    tt.style.left = (e.pageX+12)+'px';
+    tt.style.top = (e.pageY-8)+'px';
+  });
+});
+
+// ════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════
+let correlInited=false, simInited=false;
+function switchTab(name,btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='correlacoes' && !correlInited){correlInited=true;initCorrel();}
+  if(name==='simulacoes' && !simInited){simInited=true;initSim();}
+  if(name==='alertas') renderAlertHistory();
+}
+
+// ════════════════════════════════════════════════════
+// DATA GENERATION
+// ════════════════════════════════════════════════════
+
+// Vencimentos padrão — curto, médio, longo
+const preVerts = ['Jan/2026','Jan/2027','Jan/2029','Jan/2031','Jan/2033'];
+const preYieldsHoje = [10.78, 10.95, 11.18, 11.45, 11.62];
+const preYields1m   = [10.55, 10.72, 10.92, 11.18, 11.35];
+const preYields3m   = [11.05, 11.22, 11.48, 11.72, 11.88];
+
+const ipcaVerts = ['Mai/2026','Mai/2028','Mai/2030','Mai/2032','Mai/2035','Mai/2040','Mai/2050','Mai/2055'];
+const ipcaYieldsHoje = [5.45, 5.62, 5.75, 5.82, 5.91, 6.05, 6.12, 6.22];
+const ipcaYields1m   = [5.30, 5.48, 5.60, 5.68, 5.77, 5.90, 5.98, 6.08];
+const ipcaYields3m   = [5.62, 5.78, 5.92, 5.99, 6.08, 6.22, 6.30, 6.40];
+
+function genDates(n) {
+  const dates=[];let d=new Date(today);let c=0;
+  while(c<n){d.setDate(d.getDate()-1);const dw=d.getDay();if(dw!==0&&dw!==6){dates.unshift(d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));c++;}}
+  return dates;
+}
+
+function genSerie(start,n,drift=0,vol=0.05) {
+  const s=[start];
+  for(let i=1;i<n;i++) s.push(Math.max(4,Math.min(20,s[i-1]+drift+(Math.random()-.5)*vol*2)));
+  return s;
+}
+
+// ════════════════════════════════════════════════════
+// CURVAS DE JUROS
+// ════════════════════════════════════════════════════
+let ettjChart, histVencChart, spreadChart;
+let curvaTipo='pre', curvaPeriodo='1m';
+
+function initCurvas() {
+  buildETTJ();
+  buildHistVenc();
+  buildSpread();
+}
+
+function buildETTJ() {
+  if(ettjChart) ettjChart.destroy();
+  let labels, d0, d1, d3;
+  if(curvaTipo==='pre') {
+    labels=preVerts; d0=preYieldsHoje; d1=preYields1m; d3=preYields3m;
+    $('ettj-subtitle').textContent='Pré-fixado · DI Futuro / LTN / NTN-F';
+  } else if(curvaTipo==='ipca') {
+    labels=ipcaVerts; d0=ipcaYieldsHoje; d1=ipcaYields1m; d3=ipcaYields3m;
+    $('ettj-subtitle').textContent='IPCA+ · NTN-B (yields reais)';
+  } else {
+    labels=[...preVerts.map(v=>'PRÉ '+v),...ipcaVerts.map(v=>'IPCA+ '+v)];
+    d0=[...preYieldsHoje,...ipcaYieldsHoje];
+    d1=[...preYields1m,...ipcaYields1m];
+    d3=[...preYields3m,...ipcaYields3m];
+    $('ettj-subtitle').textContent='Pré-fixado + IPCA+';
+  }
+  ettjChart = new Chart($('chartETTJ').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Hoje',data:d0,borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,0.07)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#00e5a0',fill:true,tension:.4},
+      {label:'1M atrás',data:d1,borderColor:'#0099ff',borderWidth:1.5,borderDash:[5,3],pointRadius:3,fill:false,tension:.4},
+      {label:'3M atrás',data:d3,borderColor:'#ff6b35',borderWidth:1.5,borderDash:[3,3],pointRadius:3,fill:false,tension:.4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:12,padding:16}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}%`}}},
+      scales:{x:{grid:gridOpts},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+}
+
+function buildHistVenc() {
+  if(histVencChart) histVencChart.destroy();
+  const nMap={'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n=nMap[curvaPeriodo]||21;
+  const dates=genDates(n);
+  const isIPCA = curvaTipo==='ipca';
+  const base1 = isIPCA?5.45:10.78, base2=isIPCA?5.82:11.18, base3=isIPCA?6.22:11.62;
+  const drift=0.004, vol=isIPCA?.04:.06;
+  const s1=genSerie(base1,n,drift,vol);
+  const s2=genSerie(base2,n,drift+.001,vol);
+  const s3=genSerie(base3,n,drift+.002,vol);
+  const lbl1=isIPCA?'Mai/2026':'Jan/2026', lbl2=isIPCA?'Mai/2032':'Jan/2029', lbl3=isIPCA?'Mai/2055':'Jan/2033';
+  histVencChart=new Chart($('chartHistVenc').getContext('2d'),{
+    type:'line',
+    data:{labels:dates,datasets:[
+      {label:lbl1,data:s1,borderColor:'#00e5a0',borderWidth:1.5,pointRadius:0,tension:.3},
+      {label:lbl2,data:s2,borderColor:'#0099ff',borderWidth:1.5,pointRadius:0,tension:.3},
+      {label:lbl3,data:s3,borderColor:'#ff6b35',borderWidth:1.5,pointRadius:0,tension:.3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:12}}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:8}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+}
+
+function buildSpread() {
+  if(spreadChart) spreadChart.destroy();
+  const nMap={'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n=nMap[curvaPeriodo]||21;
+  const dates=genDates(n);
+  const base=curvaTipo==='ipca'?0.77:0.84;
+  const spread=genSerie(base,n,0,.08);
+  const cols=spread.map(v=>v>=0?'rgba(0,229,160,.45)':'rgba(255,68,85,.45)');
+  const bcols=spread.map(v=>v>=0?'#00e5a0':'#ff4455');
+  spreadChart=new Chart($('chartSpread').getContext('2d'),{
+    type:'bar',
+    data:{labels:dates,datasets:[{label:'Spread (bp)',data:spread.map(v=>+(v*100).toFixed(1)),backgroundColor:cols,borderColor:bcols,borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw,1)}bp`}}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:8}},y:{grid:gridOpts,ticks:{callback:v=>v.toFixed(0)+'bp'}}}}
+  });
+}
+
+function setCurvaTipo(btn,tipo) {
+  document.querySelectorAll('#curva-tipo-grp .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  curvaTipo=tipo;
+  buildETTJ(); buildHistVenc(); buildSpread();
+}
+
+function setCurvaPeriodo(btn,p) {
+  document.querySelectorAll('#curva-periodo-grp .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  curvaPeriodo=p;
+  buildHistVenc(); buildSpread();
+}
+
+let animating=false;
+function animateCurve() {
+  if(animating||!ettjChart) return;
+  animating=true;
+  const start=ettjChart.data.datasets[1].data.map(v=>v);
+  const end=ettjChart.data.datasets[0].data.map(v=>v);
+  let step=0;const steps=24;
+  const iv=setInterval(()=>{
+    const t=step/steps;
+    ettjChart.data.datasets[0].data=start.map((v,i)=>v+(end[i]-v)*t);
+    ettjChart.update('none');
+    step++;
+    if(step>steps){clearInterval(iv);animating=false;ettjChart.data.datasets[0].data=[...end];ettjChart.update();}
+  },40);
+}
+
+// ════════════════════════════════════════════════════
+// TÍTULOS & SINAIS
+// ════════════════════════════════════════════════════
+
+// Dados dos títulos
+const TITULOS_DATA = [
+  // [nome, venc, tipo, taxa, percentil252, inclCurva, spreadMeta, vsPico_bp, dur, dv01]
+  {nome:'LTN',venc:'Jan/2026',tipo:'pre',taxa:10.82,perc:72,incl:'Favorável',spreadMeta:'+7,82%',vsPico:18,dur:0.90,dv01:8.3},
+  {nome:'LTN',venc:'Jan/2027',tipo:'pre',taxa:11.05,perc:78,incl:'Favorável',spreadMeta:'+8,05%',vsPico:32,dur:1.85,dv01:16.2},
+  {nome:'LTN',venc:'Jan/2028',tipo:'pre',taxa:11.18,perc:82,incl:'Favorável',spreadMeta:'+8,18%',vsPico:45,dur:2.78,dv01:22.8},
+  {nome:'NTN-F',venc:'Jan/2029',tipo:'pre',taxa:11.28,perc:85,incl:'Favorável',spreadMeta:'+8,28%',vsPico:38,dur:4.20,dv01:34.1},
+  {nome:'NTN-F',venc:'Jan/2031',tipo:'pre',taxa:11.45,perc:88,incl:'Favorável',spreadMeta:'+8,45%',vsPico:22,dur:5.65,dv01:44.9},
+  {nome:'NTN-F',venc:'Jan/2033',tipo:'pre',taxa:11.62,perc:91,incl:'Favorável',spreadMeta:'+8,62%',vsPico:15,dur:6.80,dv01:52.3},
+  {nome:'NTN-B',venc:'Mai/2026',tipo:'ipca',taxa:5.45,perc:55,incl:'Neutro',spreadMeta:'+2,45%',vsPico:120,dur:0.95,dv01:8.8},
+  {nome:'NTN-B',venc:'Mai/2028',tipo:'ipca',taxa:5.62,perc:62,incl:'Favorável',spreadMeta:'+2,62%',vsPico:88,dur:2.82,dv01:22.4},
+  {nome:'NTN-B',venc:'Mai/2030',tipo:'ipca',taxa:5.75,perc:68,incl:'Favorável',spreadMeta:'+2,75%',vsPico:72,dur:4.55,dv01:33.8},
+  {nome:'NTN-B',venc:'Mai/2032',tipo:'ipca',taxa:5.82,perc:71,incl:'Favorável',spreadMeta:'+2,82%',vsPico:55,dur:6.20,dv01:44.2},
+  {nome:'NTN-B',venc:'Mai/2035',tipo:'ipca',taxa:5.91,perc:76,incl:'Favorável',spreadMeta:'+2,91%',vsPico:42,dur:8.40,dv01:58.6},
+  {nome:'NTN-B',venc:'Mai/2040',tipo:'ipca',taxa:6.05,perc:80,incl:'Favorável',spreadMeta:'+3,05%',vsPico:28,dur:10.80,dv01:72.1},
+  {nome:'NTN-B',venc:'Mai/2055',tipo:'ipca',taxa:6.22,perc:84,incl:'Favorável',spreadMeta:'+3,22%',vsPico:18,dur:16.20,dv01:98.4},
+  {nome:'LFT',venc:'Mar/2027',tipo:'lft',taxa:100.02,perc:50,incl:'Neutro',spreadMeta:'—',vsPico:0,dur:0.95,dv01:1.2},
+];
+
+function calcSinal(t) {
+  let score=0;
+  // Critério 1: Percentil histórico
+  if(t.tipo==='lft') return {sinal:'NEUTRAL',score:0.5,label:'NEUTRO'};
+  if(t.perc>=80) score+=1; else if(t.perc>=65) score+=0.5;
+  // Critério 2: Inclinação
+  if(t.incl==='Favorável') score+=1; else if(t.incl==='Neutro') score+=0.5;
+  // Critério 3: Spread/Meta
+  const sp=parseFloat(t.spreadMeta.replace('%','').replace('+','').replace(',','.'));
+  if(t.tipo==='ipca'){ if(sp>=3.0) score+=1; else if(sp>=2.5) score+=0.5; }
+  else { if(sp>=8.0) score+=1; else if(sp>=7.0) score+=0.5; }
+  // Critério 4: vs Pico
+  if(t.vsPico<=50) score+=1; else if(t.vsPico<=120) score+=0.5;
+  const frac=score/4;
+  if(frac>=0.75) return {sinal:'BUY_STRONG',score:frac,label:'COMPRA FORTE'};
+  if(frac>=0.50) return {sinal:'BUY',score:frac,label:'COMPRA'};
+  if(frac<=0.25) return {sinal:'SELL',score:frac,label:'VENDA'};
+  return {sinal:'NEUTRAL',score:frac,label:'NEUTRO'};
+}
+
+function percColor(p) {
+  if(p>=80) return '#00e5a0'; if(p>=60) return '#ffd93d'; return '#ff4455';
+}
+
+let filtroTipo='todos', filtroSinalAtivo='';
+
+function renderTitulos() {
+  const tbody=$('titulos-tbody');
+  tbody.innerHTML='';
+  TITULOS_DATA.filter(t=>{
+    if(filtroTipo!=='todos' && t.tipo!==filtroTipo) return false;
+    const s=calcSinal(t);
+    if(filtroSinalAtivo && s.sinal!==filtroSinalAtivo) return false;
+    return true;
+  }).forEach(t=>{
+    const s=calcSinal(t);
+    const pColor=percColor(t.perc);
+    const inclClass=t.incl==='Favorável'?'g':t.incl==='Neutro'?'y':'r';
+    const taxaFmt=t.tipo==='lft'?fmt(t.taxa)+'%':fmt(t.taxa)+'%';
+    tbody.innerHTML+=`<tr onclick="openInfo('sinais')">
+      <td class="w">${t.nome}</td>
+      <td>${t.venc}</td>
+      <td class="${t.tipo==='pre'?'o':t.tipo==='ipca'?'b':'y'}">${t.tipo==='pre'?'Pré-fixado':t.tipo==='ipca'?'IPCA+':'Pós-fixado'}</td>
+      <td class="g">${taxaFmt}</td>
+      <td>
+        <div class="pct-bar">
+          <div class="pct-track"><div class="pct-fill" style="width:${t.perc}%;background:${pColor}"></div></div>
+          <span class="pct-lbl" style="color:${pColor}">${t.perc}%</span>
+        </div>
+      </td>
+      <td class="${inclClass}">${t.incl}</td>
+      <td class="g">${t.spreadMeta}</td>
+      <td class="${t.vsPico<=50?'g':t.vsPico<=120?'y':'r'}">${t.vsPico===0?'—':'-'+t.vsPico+'bp'}</td>
+      <td class="b">${fmt(t.dur)} a</td>
+      <td>R$${fmt(t.dv01)}</td>
+      <td><span class="sig ${s.sinal}" onclick="event.stopPropagation();openInfo('sinais')">${s.label}</span></td>
+    </tr>`;
+  });
+}
+
+function filtrarTitulos(btn,tipo) {
+  document.querySelectorAll('.ctrl-row .ctrl-grp:first-of-type .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filtroTipo=tipo; renderTitulos();
+}
+
+function filtrarSinal(btn,s) {
+  document.querySelectorAll('.ctrl-row .ctrl-grp:nth-of-type(2) .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filtroSinalAtivo=s; renderTitulos();
+}
+
+function initTitulosCharts() {
+  new Chart($('chartNTNB').getContext('2d'),{
+    type:'line',
+    data:{labels:ipcaVerts,datasets:[{label:'NTN-B Yield Real',data:ipcaYieldsHoje,borderColor:'#0099ff',backgroundColor:'rgba(0,153,255,.07)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#0099ff',fill:true,tension:.4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:gridOpts},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+  const n=63,dates=genDates(n);
+  const i5=genSerie(5.55,n,.001,.04),i10=genSerie(5.65,n,.001,.03);
+  new Chart($('chartInflImpl').getContext('2d'),{
+    type:'line',
+    data:{labels:dates,datasets:[
+      {label:'5A Implícita',data:i5,borderColor:'#ffd93d',borderWidth:2,pointRadius:0,tension:.3},
+      {label:'10A Implícita',data:i10,borderColor:'#ff6b35',borderWidth:2,pointRadius:0,tension:.3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:10}}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:8}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════
+// MARCAÇÃO A MERCADO
+// ════════════════════════════════════════════════════
+const MTM_CENARIOS = [
+  {titulo:'NTN-B Mai/2035',tipo:'ipca',dataCompra:'Jan/2023',dataVenda:'Jan/2024',yieldCompra:6.45,yieldVenda:5.55,durModCompra:9.8,puCompra:3420,gain:+38.6,carregamento:+16.2,descricao:'Ciclo de alta da SELIC terminou. NTN-B atingiu pico de yield. Com queda de 90bp em 12 meses, o título subiu ~38% além do carregamento.'},
+  {titulo:'NTN-F Jan/2033',tipo:'pre',dataCompra:'Ago/2022',dataVenda:'Ago/2023',yieldCompra:13.45,yieldVenda:11.62,durModCompra:7.2,puCompra:720,gain:+52.4,carregamento:+19.8,descricao:'Pico de taxa pré-fixada em 13,45%. Com queda de 183bp ao longo de 12 meses, o retorno total foi de 52%, vs 19% de carregamento simples.'},
+  {titulo:'LTN Jan/2028',tipo:'pre',dataCompra:'Nov/2022',dataVenda:'Jun/2023',yieldCompra:13.10,yieldVenda:12.20,durModCompra:4.8,puCompra:545,gain:+21.3,carregamento:+7.8,descricao:'Queda de 90bp em 7 meses com duration de 4,8 anos gerou retorno de ~21% vs apenas 7,8% de carregamento no período.'},
+  {titulo:'NTN-B Mai/2040',tipo:'ipca',dataCompra:'Mar/2016',dataVenda:'Mar/2017',yieldCompra:7.85,yieldVenda:5.82,durModCompra:13.2,puCompra:2100,gain:+72.8,carregamento:+14.0,descricao:'Crise política 2016: yields em máxima histórica. Queda de 203bp com duration 13 anos gerou retorno extraordinário de 73% em 12 meses.'},
+  {titulo:'NTN-B Mai/2050',tipo:'ipca',dataCompra:'Out/2018',dataVenda:'Out/2019',yieldCompra:6.10,yieldVenda:3.80,durModCompra:17.5,puCompra:2580,gain:+61.2,carregamento:+13.5,descricao:'Reforma da Previdência aprovada. Com expectativa de melhora fiscal, yields reais caíram 230bp. Duration ultra-longa amplificou o ganho.'},
+  {titulo:'LTN Jan/2027',tipo:'pre',dataCompra:'Set/2023',dataVenda:'Set/2024',yieldCompra:12.80,yieldVenda:11.05,durModCompra:2.9,puCompra:690,gain:+14.2,carregamento:+13.2,descricao:'Início do ciclo de cortes da SELIC em 2023. Duration moderada limitou o ganho de capital, mas ainda superou o carregamento em 1 p.p.'},
+];
+
+let filtroMTM='todos';
+function filtrarMTM(btn,f) {
+  document.querySelectorAll('#tab-marcacao .ctrl-grp .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filtroMTM=f; renderMTMScenarios();
+}
+
+function renderMTMScenarios() {
+  const cont=$('mtm-scenarios-container');
+  cont.innerHTML='';
+  MTM_CENARIOS.filter(c=>{
+    if(filtroMTM==='todos') return true;
+    if(filtroMTM==='pre') return c.tipo==='pre';
+    if(filtroMTM==='ipca') return c.tipo==='ipca';
+    if(filtroMTM==='positivo') return c.gain>=15;
+    return true;
+  }).forEach(c=>{
+    const excesso=c.gain-c.carregamento;
+    cont.innerHTML+=`<div class="mtm-scenario">
+      <div class="mtm-header">
+        <div>
+          <div class="mtm-title">${c.titulo} <span class="badge ${c.tipo==='ipca'?'blue':'orange'}" style="margin-left:6px">${c.tipo==='ipca'?'IPCA+':'Pré-fixado'}</span></div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">${c.dataCompra} → ${c.dataVenda} · ${c.descricao}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mtm-gain pos">+${fmt(c.gain)}%</div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3)">retorno total</div>
+        </div>
+      </div>
+      <div class="mtm-details">
+        <div class="mtm-det"><span class="k">Yield na compra</span><span class="v" style="color:var(--danger)">${fmt(c.yieldCompra)}%</span></div>
+        <div class="mtm-det"><span class="k">Yield na venda</span><span class="v" style="color:var(--accent)">${fmt(c.yieldVenda)}%</span></div>
+        <div class="mtm-det"><span class="k">Queda de taxa</span><span class="v" style="color:var(--accent4)">-${fmt((c.yieldCompra-c.yieldVenda)*100,0)}bp</span></div>
+        <div class="mtm-det"><span class="k">Duration Mod.</span><span class="v" style="color:var(--accent2)">${fmt(c.durModCompra)} anos</span></div>
+        <div class="mtm-det"><span class="k">Carregamento</span><span class="v">${fmt(c.carregamento)}%</span></div>
+        <div class="mtm-det"><span class="k">Ganho capital</span><span class="v" style="color:var(--accent)">+${fmt(c.gain-c.carregamento)}%</span></div>
+        <div class="mtm-det"><span class="k">Excesso vs carry</span><span class="v" style="color:var(--buy-strong)">+${fmt(excesso)}pp</span></div>
+        <div class="mtm-det"><span class="k">PU compra (est.)</span><span class="v">${fmtBRL(c.puCompra)}</span></div>
+      </div>
+    </div>`;
+  });
+}
+
+function initMTMCharts() {
+  const n=252, dates=genDates(n);
+  // NTN-B 2035 histórico simulado com pico e vale
+  const yields=[];
+  for(let i=0;i<n;i++) {
+    const progress=i/n;
+    // pico em ~30%, vale em ~70%
+    const base=5.91+Math.sin(progress*Math.PI*1.5)*0.8+(Math.random()-.5)*.15;
+    yields.push(+base.toFixed(3));
+  }
+  // Pontos de entrada (percentil alto)
+  const entryPoints=yields.map((y,i)=>y>6.3?y:null);
+
+  new Chart($('chartMTMYield').getContext('2d'),{
+    type:'line',
+    data:{labels:dates,datasets:[
+      {label:'Yield NTN-B 2035',data:yields,borderColor:'#0099ff',borderWidth:2,pointRadius:0,tension:.3,fill:false},
+      {label:'Ponto de Entrada',data:entryPoints,borderColor:'#00ff88',borderWidth:0,pointRadius:entryPoints.map(v=>v?5:0),pointBackgroundColor:'#00ff88',showLine:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:12}},
+        annotation:{annotations:[{type:'line',yMin:6.0,yMax:6.0,borderColor:'rgba(0,255,136,.3)',borderWidth:1,borderDash:[5,3],label:{content:'Zona de Compra',enabled:true,color:'#00ff88',font:{size:9}}}]}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:10}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+
+  // Retorno acumulado comparativo
+  const ret_carry=[100], ret_mtm=[100];
+  for(let i=1;i<n;i++) {
+    ret_carry.push(ret_carry[i-1]*(1+0.0591/252));
+    const yChange=yields[i]-yields[i-1];
+    const durFactor=1-8.4*yChange/100;
+    ret_mtm.push(ret_mtm[i-1]*durFactor*(1+0.0591/252));
+  }
+  new Chart($('chartMTMRetorno').getContext('2d'),{
+    type:'line',
+    data:{labels:dates,datasets:[
+      {label:'Carregamento (hold)',data:ret_carry,borderColor:'#7ab8d4',borderWidth:1.5,pointRadius:0,tension:.2},
+      {label:'Estratégia Marcação',data:ret_mtm,borderColor:'#00e5a0',borderWidth:2.5,pointRadius:0,tension:.3,fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:12}}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:10}},y:{grid:gridOpts,ticks:{callback:v=>(v-100).toFixed(0)+'%'}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════
+// CORRELAÇÕES
+// ════════════════════════════════════════════════════
+const corrAtivos=['DI Jan/26','DI Jan/29','DI Jan/33','NTN-B 35','NTN-F 33','IPCA','CDI','BRL'];
+function genMat(){
+  const n=corrAtivos.length,mat=[];
+  for(let i=0;i<n;i++){mat[i]=[];for(let j=0;j<n;j++){
+    if(i===j){mat[i][j]=1;continue;}
+    if(j<i){mat[i][j]=mat[j][i];continue;}
+    if(i<3&&j<3) mat[i][j]=0.90+Math.random()*.08;
+    else if(i<5&&j<5) mat[i][j]=0.65+Math.random()*.25;
+    else mat[i][j]=-0.3+Math.random()*.7;
+    mat[i][j]=Math.max(-1,Math.min(1,mat[i][j]));
+  }}
+  return mat;
+}
+function corrBg(v){
+  if(v>=.8) return 'rgba(0,229,160,.8)';if(v>=.5) return 'rgba(0,229,160,.4)';
+  if(v>=.2) return 'rgba(255,217,61,.3)';if(v>=-.2) return 'rgba(28,58,82,.6)';
+  if(v>=-.5) return 'rgba(255,107,53,.35)';return 'rgba(255,68,85,.7)';
+}
+function buildHeatmap(mat){
+  const n=corrAtivos.length,el=$('heatmap-container');
+  const g=document.createElement('div');
+  g.className='hmap-grid';
+  g.style.gridTemplateColumns='50px '+'1fr '.repeat(n);
+  const emptyH=document.createElement('div');g.appendChild(emptyH);
+  corrAtivos.forEach(a=>{const d=document.createElement('div');d.className='hmap-lbl';d.textContent=a.split(' ')[1]||a.split(' ')[0];d.style.fontSize='9px';g.appendChild(d);});
+  for(let i=0;i<n;i++){
+    const rl=document.createElement('div');rl.className='hmap-lbl';rl.style.textAlign='right';rl.textContent=a=corrAtivos[i].split(' ')[1]||corrAtivos[i];g.appendChild(rl);
+    for(let j=0;j<n;j++){
+      const c=document.createElement('div');c.className='hmap-cell';
+      const v=mat[i][j];c.style.background=corrBg(v);
+      c.style.color=Math.abs(v)>.45?'#e8f4f8':'#7ab8d4';
+      c.textContent=fmt(v);c.title=`${corrAtivos[i]} × ${corrAtivos[j]}: ${fmt(v)}`;
+      g.appendChild(c);
+    }
+  }
+  el.innerHTML='';el.appendChild(g);
+}
+let corrRChart,scatterChart;
+function initCorrel(){
+  buildHeatmap(genMat());
+  const n=63,dates=genDates(n);
+  const c1=genSerie(.92,n,0,.02).map(v=>Math.min(1,Math.max(-1,v)));
+  const c2=genSerie(.48,n,0,.05).map(v=>Math.min(1,Math.max(-1,v)));
+  corrRChart=new Chart($('chartCorrelRolante').getContext('2d'),{
+    type:'line',data:{labels:dates,datasets:[
+      {label:'DI26×NTN-B35',data:c1,borderColor:'#00e5a0',borderWidth:2,pointRadius:0,tension:.4},
+      {label:'NTN-B×IPCA',data:c2,borderColor:'#ffd93d',borderWidth:2,pointRadius:0,tension:.4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:10}}},
+      scales:{x:{grid:gridOpts,ticks:{maxTicksLimit:8}},y:{min:-1,max:1,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
+  const pts1=Array.from({length:60},()=>({x:(Math.random()-.5)*.3,y:0}));
+  pts1.forEach(p=>p.y=p.x*.93+(Math.random()-.5)*.06);
+  const pts2=Array.from({length:60},()=>({x:(Math.random()-.5)*.3,y:0}));
+  pts2.forEach(p=>p.y=p.x*.45+(Math.random()-.5)*.15);
+  scatterChart=new Chart($('chartScatter').getContext('2d'),{
+    type:'scatter',
+    data:{datasets:[
+      {label:'DI26×NTN-B35',data:pts1,backgroundColor:'rgba(0,229,160,.5)',pointRadius:4},
+      {label:'NTN-B×IPCA',data:pts2,backgroundColor:'rgba(255,217,61,.5)',pointRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyleWidth:10,padding:10}}},
+      scales:{x:{grid:gridOpts,ticks:{callback:v=>(v*100).toFixed(1)+'%'}},y:{grid:gridOpts,ticks:{callback:v=>(v*100).toFixed(1)+'%'}}}}
+  });
+}
+function setCorrelWin(btn,w){
+  document.querySelectorAll('#corr-win-grp .ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const dates=genDates(w);
+  const c1=genSerie(.92,w,0,.02).map(v=>Math.min(1,Math.max(-1,v)));
+  const c2=genSerie(.48,w,0,.05).map(v=>Math.min(1,Math.max(-1,v)));
+  corrRChart.data.labels=dates;corrRChart.data.datasets[0].data=c1;corrRChart.data.datasets[1].data=c2;corrRChart.update();
+  buildHeatmap(genMat());
+}
+
+// ════════════════════════════════════════════════════
+// CALCULADORAS
+// ════════════════════════════════════════════════════
+function diasUteis(d1,d2){return Math.round((new Date(d2)-new Date(d1))/(864e5)*252/365);}
+function diasCorridos(d1,d2){return Math.round((new Date(d2)-new Date(d1))/864e5);}
+
+function crRow(label,val,cls=''){return `<div class="cr-row"><span class="lbl">${label}</span><span class="val ${cls}">${val}</span></div>`;}
+
+function calcPre(){
+  const vn=parseFloat($('pre-vn').value),taxa=parseFloat($('pre-taxa').value)/100;
+  const compra=$('pre-compra').value,venc=$('pre-venc').value,conv=parseInt($('pre-conv').value);
+  if(!compra||!venc) return alert('Preencha as datas');
+  const exp=conv===252?diasUteis(compra,venc)/252:diasCorridos(compra,venc)/conv;
+  if(exp<=0) return alert('Vencimento deve ser posterior à compra');
+  const pu=vn/Math.pow(1+taxa,exp);
+  const du=conv===252?diasUteis(compra,venc):diasCorridos(compra,venc);
+  const ir=du<=180?22.5:du<=360?20:du<=720?17.5:15;
+  const ganho=vn-pu,irVal=ganho*(ir/100);
+  const durMod=exp/(1+taxa),dv01=pu*durMod*0.0001;
+  const deltaP100=-durMod*0.01*pu;
+  const el=$('pre-result');el.style.display='block';
+  el.innerHTML=crRow('PU de Compra',fmtBRL(pu),'w')+crRow('Prazo',du+(conv===252?' d.u.'>' dias'))+crRow('Rentabilidade Bruta',fmt(((vn/pu)-1)*100)+'%')+crRow('Alíquota IR',fmt(ir,1)+'%','y')+crRow('IR a Pagar',fmtBRL(irVal),'r')+crRow('Retorno Líquido',fmtBRL(ganho-irVal))+crRow('Duration Modificada',fmt(durMod)+' anos','b')+crRow('DV01 (1bp)',fmtBRL(dv01))+crRow('ΔPU +100bp',fmtBRL(deltaP100),'r');
+}
+
+function calcNTNB(){
+  const vna=parseFloat($('ntnb-vna').value),taxaReal=parseFloat($('ntnb-taxa').value)/100;
+  const compra=$('ntnb-compra').value,venc=$('ntnb-venc').value,cupomAA=parseFloat($('ntnb-cupom').value)/100;
+  if(!compra||!venc) return alert('Preencha as datas');
+  const anos=diasUteis(compra,venc)/252;if(anos<=0) return alert('Verifique as datas');
+  const cupomSem=Math.pow(1+cupomAA,.5)-1,nSem=Math.round(anos*2),taxaSem=Math.pow(1+taxaReal,.5)-1;
+  let pu=0,durNum=0;
+  for(let i=1;i<=nSem;i++){
+    const fx=i===nSem?vna*(1+cupomSem):vna*cupomSem;
+    const pv=fx/Math.pow(1+taxaSem,i);
+    pu+=pv;durNum+=(i/2)*pv;
+  }
+  const durMac=durNum/pu,durMod=durMac/(1+taxaReal),dv01=pu*durMod*.0001;
+  const el=$('ntnb-result');el.style.display='block';
+  el.innerHTML=crRow('PU NTN-B',fmtBRL(pu),'w')+crRow('Cupom Semestral',fmt(cupomSem*100)+'%')+crRow('Nº Cupons',nSem)+crRow('Duration Macaulay',fmt(durMac)+' anos','b')+crRow('Duration Modificada',fmt(durMod)+' anos','b')+crRow('DV01 (1bp)',fmtBRL(dv01))+crRow('ΔPU +100bp',fmtBRL(-durMod*.01*pu),'r');
+}
+
+function calcCDI(){
+  const val=parseFloat($('cdi-val').value),pct=parseFloat($('cdi-pct').value)/100;
+  const cdi=parseFloat($('cdi-taxa').value)/100,dias=parseInt($('cdi-dias').value),ir=parseFloat($('cdi-ir').value)/100;
+  const cdiD=Math.pow(1+cdi,1/252)-1,fator=Math.pow(1+cdiD*pct,dias);
+  const mb=val*fator,rb=mb-val,irVal=rb*ir,ml=mb-irVal;
+  const el=$('cdi-result');el.style.display='block';
+  el.innerHTML=crRow('Montante Bruto',fmtBRL(mb),'w')+crRow('Rendimento Bruto',fmtBRL(rb))+crRow('IR',fmtBRL(irVal),'r')+crRow('Montante Líquido',fmtBRL(ml))+crRow('Rentab. Bruta',fmt((fator-1)*100)+'%')+crRow('Rentab. Líquida',fmt((ml/val-1)*100)+'%','b')+crRow('CDI Diário',fmt(cdiD*100,4)+'%','y');
+}
+
+function calcDuration(){
+  const tipo=$('dur-tipo').value,pu=parseFloat($('dur-pu').value);
+  const y=parseFloat($('dur-yield').value)/100,prazo=parseFloat($('dur-prazo').value),cup=parseFloat($('dur-cupom').value)/100;
+  let durMac,durMod,conv,dv01;
+  if(tipo==='zero'){
+    durMac=prazo;durMod=prazo/(1+y);
+    conv=prazo*(prazo+1/252)/Math.pow(1+y,2);
+  } else {
+    const nS=Math.round(prazo*2),tS=Math.pow(1+y,.5)-1,cS=Math.pow(1+cup,.5)-1,vna=1000;
+    let spv=0,stpv=0,st2pv=0;
+    for(let i=1;i<=nS;i++){const fx=i===nS?vna*(1+cS):vna*cS;const pv=fx/Math.pow(1+tS,i);spv+=pv;stpv+=(i/2)*pv;st2pv+=(i/2)*((i/2)+.5)*pv;}
+    durMac=stpv/spv;durMod=durMac/(1+y);conv=st2pv/(spv*Math.pow(1+y,2));
+  }
+  dv01=pu*durMod*.0001;
+  const dP100=-durMod*.01*pu+.5*conv*.01*.01*pu;
+  const el=$('dur-result');el.style.display='block';
+  el.innerHTML=crRow('Duration Macaulay',fmt(durMac)+' anos','w')+crRow('Duration Modificada',fmt(durMod)+' anos')+crRow('Convexidade',fmt(conv,4),'b')+crRow('DV01 (1bp)',fmtBRL(dv01),'y')+crRow('ΔPU +100bp',fmtBRL(dP100),'r')+crRow('ΔPU%  +100bp',fmt(dP100/pu*100)+'%','r');
+}
+
+// ════════════════════════════════════════════════════
+// SIMULAÇÕES
+// ════════════════════════════════════════════════════
+let sensChart,mcChart,mcH=12,mcT=50;
+function initSim(){runSim();runMonteCarlo();}
+
+function runSim(){
+  const pu=parseFloat($('sim-pu').value)||100000,dur=parseFloat($('sim-dur').value)||3.5;
+  const bp=parseInt($('sim-choque').value)||100,dy=bp/10000;
+  const conv=dur*(dur+.25)/Math.pow(1.105,2);
+  const dL=-dur*dy*pu,dC=.5*conv*dy*dy*pu,dT=dL+dC;
+  const dv01=pu*dur*.0001/(1.105);
+  const el=$('sim-results');
+  el.innerHTML=`
+    <div class="sim-card"><div class="sim-card-lbl">ΔP Linear</div><div class="sim-card-val ${dL<0?'r':''}">${fmtBRL(dL)}</div></div>
+    <div class="sim-card"><div class="sim-card-lbl">ΔP Convex.</div><div class="sim-card-val b">${fmtBRL(dC)}</div></div>
+    <div class="sim-card"><div class="sim-card-lbl">ΔP Total</div><div class="sim-card-val ${dT<0?'o':''}">${fmtBRL(dT)}</div></div>
+    <div class="sim-card"><div class="sim-card-lbl">Novo PU</div><div class="sim-card-val y">${fmtBRL(pu+dT)}</div></div>
+    <div class="sim-card"><div class="sim-card-lbl">Var %</div><div class="sim-card-val ${dT<0?'r':'g'}">${fmt(dT/pu*100)}%</div></div>
+    <div class="sim-card"><div class="sim-card-lbl">DV01</div><div class="sim-card-val">${fmtBRL(dv01)}</div></div>
+  `;
+  buildSens(pu,dur);
+}
+
+function buildSens(pu,dur){
+  const conv=dur*(dur+.25)/Math.pow(1.105,2);
+  const bps=[-500,-400,-300,-200,-100,-50,0,50,100,200,300,400,500];
+  const novos=bps.map(b=>{const dy=b/10000;return pu+(-dur*dy*pu+.5*conv*dy*dy*pu);});
+  if(sensChart) sensChart.destroy();
+  sensChart=new Chart($('chartSens').getContext('2d'),{
+    type:'line',
+    data:{labels:bps.map(b=>b+'bp'),datasets:[{label:'PU após choque',data:novos,borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,.07)',borderWidth:2,pointRadius:4,pointBackgroundColor:bps.map(b=>b<0?'#ff4455':b===0?'#ffd93d':'#00e5a0'),fill:true,tension:.3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:gridOpts},y:{grid:gridOpts,ticks:{callback:v=>'R$'+Math.round(v/1000)+'k'}}}}
+  });
+}
+
+function setMCH(btn,h){document.querySelectorAll('#tab-simulacoes .ctrl-grp:first-of-type .ctrl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mcH=h;}
+function setMCT(btn,n){document.querySelectorAll('#tab-simulacoes .ctrl-grp:nth-of-type(2) .ctrl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mcT=n;}
+
+function runMonteCarlo(){
+  const s0=10.5,mu=0,sigma=0.30,n=mcH,nT=mcT;
+  const labels=Array.from({length:n+1},(_,i)=>i===0?'Hoje':`M${i}`);
+  const datasets=[],finals=[];
+  for(let t=0;t<nT;t++){
+    const traj=[s0];
+    for(let i=1;i<=n;i++) traj.push(Math.max(4,Math.min(22,traj[i-1]+mu+(Math.random()-.5)*sigma*2)));
+    finals.push(traj[n]);
+    datasets.push({data:traj,borderColor:`rgba(0,153,255,${Math.min(.25,3/nT)})`,borderWidth:1,pointRadius:0,fill:false,tension:.3});
+  }
+  finals.sort((a,b)=>a-b);
+  const p10=finals[Math.floor(nT*.1)],p50=finals[Math.floor(nT*.5)],p90=finals[Math.floor(nT*.9)];
+  datasets.push({label:`P50: ${fmt(p50)}%`,data:Array.from({length:n+1},(_,i)=>s0+(p50-s0)*i/n),borderColor:'#ffd93d',borderWidth:2.5,pointRadius:0,fill:false,tension:.3});
+  if(mcChart) mcChart.destroy();
+  mcChart=new Chart($('chartMC').getContext('2d'),{
+    type:'line',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},
+      plugins:{legend:{display:true,labels:{filter:i=>i.text&&i.text.includes('P50'),usePointStyle:true}},
+        tooltip:{enabled:false}},
+      scales:{x:{grid:gridOpts},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)+'%'}}}}
+  });
+  const title=$('#tab-simulacoes .chart-box:last-child .chart-title');
+  if(title) title.innerHTML=`Monte Carlo — Selic | <span style="color:var(--danger)">P10: ${fmt(p10)}%</span> | <span style="color:var(--accent4)">P50: ${fmt(p50)}%</span> | <span style="color:var(--accent)">P90: ${fmt(p90)}%</span> <span class="info-icon" onclick="openInfo('monteCarlo')">ℹ</span>`;
+}
+
+// ════════════════════════════════════════════════════
+// ALERTAS
+// ════════════════════════════════════════════════════
+let alertas=[];
+const alertHistory=[
+  {tipo:'danger',icon:'🔴',title:'DI Jan/2029 cruzou 11,30%',desc:'Taxa subiu para 11,35% — gatilho de compra atingido',time:'Hoje 14:32',badge:'DISPARO',bc:'red'},
+  {tipo:'warn',icon:'🟡',title:'IPCA 12m acima de 4,50%',desc:'Acumulado em 4,62% — pressão sobre meta BCB',time:'Ontem 09:15',badge:'AVISO',bc:'yellow'},
+  {tipo:'info',icon:'🔵',title:'NTN-B 2035 yield acima de 5,90%',desc:'Percentil histórico atingiu 76% — oportunidade identificada',time:'22/03 16:45',badge:'INFO',bc:'green'},
+];
+function renderAlertHistory(){
+  const el=$('alert-history');el.innerHTML='';
+  alertHistory.forEach(a=>{
+    el.innerHTML+=`<div class="alert-item ${a.tipo}" style="margin-bottom:8px">
+      <div style="font-size:18px;width:24px;text-align:center">${a.icon}</div>
+      <div class="alert-content"><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div></div>
+      <span class="badge ${a.bc}">${a.badge}</span>
+      <div class="alert-time">${a.time}</div>
+    </div>`;
+  });
+}
+function addAlerta(){
+  const ativo=$('alerta-ativo').value,cond=$('alerta-cond').value,valor=$('alerta-valor').value,nota=$('alerta-nota').value||'—';
+  const condTxt={above:'Acima de',below:'Abaixo de',change:'Variação >'}[cond];
+  alertas.push({ativo,condTxt,valor,nota,id:Date.now()});
+  renderAlertasAtivos();$('alerta-nota').value='';
+}
+function removeAlerta(id){alertas=alertas.filter(a=>a.id!==id);renderAlertasAtivos();}
+function renderAlertasAtivos(){
+  $('alert-count').textContent=alertas.length;
+  const el=$('alertas-lista');
+  if(!alertas.length){el.innerHTML='<div style="color:var(--text3);font-family:var(--mono);font-size:11px;text-align:center;padding:28px">Nenhum alerta configurado</div>';return;}
+  el.innerHTML=alertas.map(a=>`<div class="alert-item info" style="margin-bottom:8px">
+    <div style="font-size:16px">🔔</div>
+    <div class="alert-content"><div class="alert-title">${a.ativo} — ${a.condTxt} ${a.valor}%</div><div class="alert-desc">${a.nota}</div></div>
+    <button onclick="removeAlerta(${a.id})" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:var(--mono)">✕</button>
+  </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════
+// BCB API — DADOS REAIS
+// ════════════════════════════════════════════════════
+
+// Estado dos dados reais carregados
+const BCB = {
+  selic: null,      // série diária SELIC (cód 11)
+  metaSelic: null,  // meta SELIC COPOM (cód 432)
+  cdi: null,        // CDI diário (cód 12)
+  ipca12m: null,    // IPCA acumulado 12m (cód 13522)
+  cambio: null,     // BRL/USD ptax (cód 1)
+  imaB: null,       // IMA-B diário (cód 189)
+  imaBCurto: null,  // IMA-B 5 (cód 7478)
+  imaBLongo: null,  // IMA-B 5+ (cód 7477)
+};
+
+// Busca uma série do BCB SGS — retorna [{data, valor}]
+async function bcbGet(codigo, ultimos = null, dataInicial = '') {
+  let url;
+  if (ultimos) {
+    url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados/ultimos/${ultimos}?formato=json`;
+  } else {
+    url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json`;
+    if (dataInicial) url += `&dataInicial=${dataInicial}`;
+  }
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`BCB ${codigo}: HTTP ${res.status}`);
+  const raw = await res.json();
+  return raw.map(d => ({
+    data: new Date(d.data.split('/').reverse().join('-')),
+    valor: parseFloat(d.valor),
+    dataStr: d.data
+  })).filter(d => !isNaN(d.valor));
+}
+
+// Formata valor para exibição BR
+function fmtPct(v, dec = 2) {
+  return v.toFixed(dec).replace('.', ',') + '%';
+}
+
+// Atualiza um card no header
+function setHstat(id, val, delta = null, deltaClass = '') {
+  const el = $(id);
+  if (el) el.textContent = val;
+  if (delta !== null) {
+    const dEl = $(id + '-delta');
+    if (dEl) {
+      dEl.textContent = delta;
+      dEl.className = 'hstat-delta ' + deltaClass;
+    }
+  }
+}
+
+// Status bar de carregamento
+function setSourceBar(msg, type = 'loading') {
+  const bars = document.querySelectorAll('.src-bar span:first-of-type');
+  const color = type === 'ok' ? 'var(--accent)' : type === 'err' ? 'var(--danger)' : 'var(--text3)';
+  bars.forEach(b => {
+    if (b.textContent.includes('simulad') || b.textContent.includes('BCB') || b.textContent.includes('Carregando')) {
+      b.textContent = msg;
+      b.style.color = color;
+    }
+  });
+}
+
+// Calcula variação % entre dois últimos valores
+function calcVar(serie) {
+  if (!serie || serie.length < 2) return null;
+  const prev = serie[serie.length - 2].valor;
+  const curr = serie[serie.length - 1].valor;
+  return ((curr - prev) / Math.abs(prev)) * 100;
+}
+
+// Função principal: carrega todos os dados do BCB
+async function loadRealData() {
+  setSourceBar('⟳ Carregando dados do Banco Central...', 'loading');
+
+  const results = await Promise.allSettled([
+    bcbGet(11, 504),       // SELIC diária — 2 anos (~504 du)
+    bcbGet(432, null, '01/01/2019'), // Meta SELIC desde 2019
+    bcbGet(12, 21),        // CDI últimos 21 dias
+    bcbGet(13522, 24),     // IPCA 12m últimos 24 meses
+    bcbGet(1, 5),          // Câmbio últimos 5 dias
+    bcbGet(189, 504),      // IMA-B 2 anos
+    bcbGet(7478, 252),     // IMA-B 5 (curto)
+    bcbGet(7477, 252),     // IMA-B 5+ (longo)
+  ]);
+
+  const [rSelic, rMeta, rCDI, rIPCA, rCambio, rIMAB, rIMAB5, rIMAB5p] = results;
+
+  let loadedCount = 0;
+
+  // ── SELIC
+  if (rSelic.status === 'fulfilled' && rSelic.value.length > 0) {
+    BCB.selic = rSelic.value;
+    const ultimo = BCB.selic.at(-1).valor;
+    const penult = BCB.selic.at(-2)?.valor ?? ultimo;
+    const diff = ultimo - penult;
+    setHstat('h-selic-val', fmtPct(ultimo));
+    const hselicDelta = $('h-selic-delta');
+    if (hselicDelta) {
+      hselicDelta.textContent = diff === 0 ? 'sem variação' : `${diff > 0 ? '▲' : '▼'} ${Math.abs(diff).toFixed(4)}% vs ontem`;
+      hselicDelta.className = 'hstat-delta ' + (diff > 0 ? 'dn' : diff < 0 ? 'up' : '');
+    }
+    loadedCount++;
+  }
+
+  // ── Meta SELIC (COPOM)
+  if (rMeta.status === 'fulfilled' && rMeta.value.length > 0) {
+    BCB.metaSelic = rMeta.value;
+    loadedCount++;
+  }
+
+  // ── CDI
+  if (rCDI.status === 'fulfilled' && rCDI.value.length > 0) {
+    BCB.cdi = rCDI.value;
+    const cdiDiario = BCB.cdi.at(-1).valor;
+    setHstat('h-cdi-val', fmtPct(cdiDiario, 4));
+    loadedCount++;
+  }
+
+  // ── IPCA 12m
+  if (rIPCA.status === 'fulfilled' && rIPCA.value.length > 0) {
+    BCB.ipca12m = rIPCA.value;
+    const ipcaAtual = BCB.ipca12m.at(-1).valor;
+    const ipcaAnt = BCB.ipca12m.at(-2)?.valor ?? ipcaAtual;
+    const diff = ipcaAtual - ipcaAnt;
+    setHstat('h-ipca-val', fmtPct(ipcaAtual));
+    const hIPCADelta = $('h-ipca-delta');
+    if (hIPCADelta) {
+      const dentroMeta = ipcaAtual <= 4.5;
+      hIPCADelta.textContent = `meta: 3,00% ±1,5 ${dentroMeta ? '✓' : '⚠'}`;
+      hIPCADelta.className = 'hstat-delta ' + (dentroMeta ? 'up' : 'dn');
+    }
+    loadedCount++;
+  }
+
+  // ── Câmbio
+  if (rCambio.status === 'fulfilled' && rCambio.value.length > 0) {
+    BCB.cambio = rCambio.value;
+    const cambioAtual = BCB.cambio.at(-1).valor;
+    const cambioAnt = BCB.cambio.at(-2)?.valor ?? cambioAtual;
+    const varCambio = ((cambioAtual - cambioAnt) / cambioAnt * 100);
+    setHstat('h-cambio-val', cambioAtual.toFixed(2).replace('.', ','));
+    const hCambioDelta = $('h-cambio-delta');
+    if (hCambioDelta) {
+      hCambioDelta.textContent = `${varCambio > 0 ? '▲' : '▼'} ${Math.abs(varCambio).toFixed(2)}% hoje`;
+      hCambioDelta.className = 'hstat-delta ' + (varCambio > 0 ? 'dn' : 'up');
+    }
+    loadedCount++;
+  }
+
+  // ── IMA-B
+  if (rIMAB.status === 'fulfilled' && rIMAB.value.length > 0) {
+    BCB.imaB = rIMAB.value;
+    loadedCount++;
+  }
+  if (rIMAB5.status === 'fulfilled') BCB.imaBCurto = rIMAB5.value;
+  if (rIMAB5p.status === 'fulfilled') BCB.imaBLongo = rIMAB5p.value;
+
+  // ── Atualiza gráfico histórico com SELIC real
+  if (BCB.selic && BCB.selic.length > 0) {
+    updateHistVencWithSelic();
+  }
+
+  // ── Atualiza gráfico de correlações com IMA-B real (se já iniciado)
+  if (correlInited && BCB.imaB) updateCorrelWithReal();
+
+  // ── Atualiza inclinação no header
+  updateInclinacaoHeader();
+
+  // ── Data de referência
+  const dataRef = BCB.selic?.at(-1)?.dataStr ?? today.toLocaleDateString('pt-BR');
+  $('h-date').textContent = dataRef;
+  $('curva-ref').textContent = dataRef + ' 18h00';
+
+  // ── Atualiza src-bar
+  if (loadedCount >= 4) {
+    setSourceBar(`✓ Dados reais BCB · ${loadedCount}/8 séries carregadas · SELIC e IPCA atualizados`, 'ok');
+    // Atualiza src-bar das curvas
+    const curvaSrcBar = document.querySelector('#tab-curvas .src-bar span:not([style])');
+    if (curvaSrcBar) curvaSrcBar.textContent = `✓ SELIC real (BCB) · Curvas DI/NTN-B: estrutura pronta para ANBIMA Feed`;
+    // Marca header como dado real
+    const hDateDelta = document.querySelector('#h-date')?.closest('.hstat')?.querySelector('.hstat-delta');
+    if (hDateDelta) { hDateDelta.textContent = 'dados BCB reais'; hDateDelta.className = 'hstat-delta up'; }
+  } else {
+    setSourceBar(`⚠ BCB parcial: ${loadedCount}/8 séries · restante: dados simulados`, 'err');
+  }
+}
+
+// Atualiza o gráfico de evolução histórica com a SELIC real do BCB
+function updateHistVencWithSelic() {
+  if (!histVencChart || !BCB.selic) return;
+  if (curvaTipo === 'ipca' && !BCB.imaB) return; // espera IMA-B para IPCA
+
+  // Para pré-fixado, usa SELIC como proxy do curto prazo
+  const serie = curvaTipo === 'ipca' ? BCB.imaB : BCB.selic;
+  if (!serie) return;
+
+  const nMap = {'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n = Math.min(nMap[curvaPeriodo] || 21, serie.length);
+  const slice = serie.slice(-n);
+
+  const labels = slice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}));
+  const vals   = slice.map(d => d.valor);
+
+  histVencChart.data.labels = labels;
+  histVencChart.data.datasets[0].data = vals;
+  histVencChart.data.datasets[0].label = curvaTipo === 'ipca' ? 'IMA-B (BCB real)' : 'SELIC diária (BCB real)';
+
+  // Spread: usa IMA-B 5 e IMA-B 5+ se disponíveis
+  if (BCB.imaBCurto && BCB.imaBLongo && curvaTipo === 'ipca') {
+    const sliceCurto = BCB.imaBCurto.slice(-n);
+    const sliceLongo = BCB.imaBLongo.slice(-n);
+    if (sliceCurto.length === n && sliceLongo.length === n) {
+      histVencChart.data.datasets[1].data = sliceCurto.map(d => d.valor);
+      histVencChart.data.datasets[1].label = 'IMA-B 5 (BCB real)';
+      histVencChart.data.datasets[2].data = sliceLongo.map(d => d.valor);
+      histVencChart.data.datasets[2].label = 'IMA-B 5+ (BCB real)';
+    }
+  }
+
+  histVencChart.update();
+
+  // Atualiza spread chart com diferença real SELIC hoje vs 21d atrás
+  updateSpreadWithSelic();
+}
+
+// Atualiza spread com dados reais
+function updateSpreadWithSelic() {
+  if (!spreadChart || !BCB.selic) return;
+  const nMap = {'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n = Math.min(nMap[curvaPeriodo] || 21, BCB.selic.length);
+  const slice = BCB.selic.slice(-n);
+  const labels = slice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}));
+  // Spread diário = variação em bp (comparado ao valor 21d antes na série)
+  const window21 = 21;
+  const spreads = slice.map((d, i) => {
+    const prev = slice[Math.max(0, i - window21)];
+    return +((d.valor - prev.valor) * 100).toFixed(1);
+  });
+  spreadChart.data.labels = labels;
+  spreadChart.data.datasets[0].data = spreads;
+  spreadChart.data.datasets[0].backgroundColor = spreads.map(v => v >= 0 ? 'rgba(0,229,160,.45)' : 'rgba(255,68,85,.45)');
+  spreadChart.data.datasets[0].borderColor = spreads.map(v => v >= 0 ? '#00e5a0' : '#ff4455');
+  spreadChart.update();
+}
+
+// Calcula e exibe a inclinação real no header com base na SELIC
+function updateInclinacaoHeader() {
+  if (!BCB.selic || BCB.selic.length < 2) return;
+  const selicHoje = BCB.selic.at(-1).valor;
+  const selic21d = BCB.selic.length >= 22 ? BCB.selic.at(-22).valor : BCB.selic.at(0).valor;
+  const difBp = +((selicHoje - selic21d) * 100).toFixed(0);
+  const inclEl = $('h-incl-val');
+  if (inclEl) {
+    inclEl.textContent = (difBp >= 0 ? '+' : '') + difBp + 'bp';
+    inclEl.className = 'hstat-val yellow';
+  }
+  const inclDelta = $('h-incl-delta');
+  if (inclDelta) {
+    inclDelta.textContent = difBp > 30 ? 'curva inclinando' : difBp < -30 ? 'curva achatando' : 'curva estável';
+    inclDelta.className = 'hstat-delta ' + (difBp > 0 ? 'dn' : 'up');
+  }
+}
+
+// Atualiza gráfico de correlações com dados IMA-B reais
+function updateCorrelWithReal() {
+  if (!corrRChart || !BCB.imaB || !BCB.selic) return;
+  const n = Math.min(63, BCB.imaB.length, BCB.selic.length);
+  const imaSlice  = BCB.imaB.slice(-n);
+  const selSlice  = BCB.selic.slice(-n);
+  const labels    = imaSlice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}));
+
+  // Correlação rolante 21d entre SELIC e IMA-B (como proxy de DI vs NTN-B)
+  const correls = imaSlice.map((_, i) => {
+    if (i < 20) return null;
+    const wSelic = selSlice.slice(i-20, i+1).map(d => d.valor);
+    const wIMAB  = imaSlice.slice(i-20, i+1).map(d => d.valor);
+    const meanS = wSelic.reduce((a,b)=>a+b,0)/21;
+    const meanI = wIMAB.reduce((a,b)=>a+b,0)/21;
+    let num=0, denS=0, denI=0;
+    for(let j=0;j<21;j++){
+      num  += (wSelic[j]-meanS)*(wIMAB[j]-meanI);
+      denS += (wSelic[j]-meanS)**2;
+      denI += (wIMAB[j]-meanI)**2;
+    }
+    const denom = Math.sqrt(denS*denI);
+    return denom === 0 ? 0 : +(num/denom).toFixed(4);
+  }).filter(v => v !== null);
+
+  const labelsCorrel = labels.slice(20);
+  corrRChart.data.labels = labelsCorrel;
+  corrRChart.data.datasets[0].data = correls;
+  corrRChart.data.datasets[0].label = 'SELIC × IMA-B (real BCB)';
+  corrRChart.update();
+}
+
+// ════════════════════════════════════════════════════
+// IMPORT CSV ANBIMA
+// ════════════════════════════════════════════════════
+function setupCSVImport() {
+  // Cria botão de import flutuante
+  const btn = document.createElement('div');
+  btn.id = 'csv-import-btn';
+  btn.innerHTML = `
+    <div style="position:fixed;bottom:20px;right:20px;z-index:200">
+      <label for="csv-file-input" style="
+        display:flex;align-items:center;gap:8px;
+        background:var(--surface2);border:1px solid var(--border2);
+        border-radius:8px;padding:10px 16px;cursor:pointer;
+        font-family:var(--mono);font-size:11px;color:var(--accent2);
+        transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,.4)
+      " onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border2)'">
+        📂 Importar CSV ANBIMA
+      </label>
+      <input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none" onchange="handleCSVUpload(this)">
+    </div>
+  `;
+  document.body.appendChild(btn);
+}
+
+function handleCSVUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      parseAnbimaCSV(e.target.result, file.name);
+    } catch(err) {
+      alert('Erro ao processar CSV: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'latin1');
+}
+
+function parseAnbimaCSV(text, filename) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // Detecta separador
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const header = lines[0].split(sep).map(h => h.toLowerCase().trim());
+
+  // Mapeia colunas flexivelmente
+  const colData  = header.findIndex(h => h.includes('data'));
+  const colTipo  = header.findIndex(h => h.includes('tipo') || h.includes('titulo'));
+  const colVenc  = header.findIndex(h => h.includes('venc'));
+  const colTaxa  = header.findIndex(h => h.includes('indicativa') || h.includes('taxa') && h.includes('venda'));
+  const colPU    = header.findIndex(h => h.includes('pu') || h.includes('preco'));
+
+  if (colTaxa < 0) { alert('CSV não reconhecido — coluna de taxa não encontrada.'); return; }
+
+  const dados = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(sep);
+    if (cols.length < 3) continue;
+    const taxa = parseFloat((cols[colTaxa] || '').replace(',', '.').replace('%', '').trim());
+    const pu   = colPU >= 0 ? parseFloat((cols[colPU] || '0').replace(',', '.').trim()) : 0;
+    if (isNaN(taxa)) continue;
+    dados.push({
+      data: cols[colData]?.trim() || '',
+      tipo: (cols[colTipo] || '').trim(),
+      venc: (cols[colVenc] || '').trim(),
+      taxa, pu
+    });
+  }
+
+  if (dados.length === 0) { alert('Nenhum dado válido encontrado no CSV.'); return; }
+
+  // Atualiza status bar
+  setSourceBar(`✓ CSV ANBIMA: ${dados.length} registros · ${filename}`, 'ok');
+
+  // Mostra resumo e atualiza tabela de títulos com taxas reais
+  updateTitulosFromCSV(dados);
+}
+
+function updateTitulosFromCSV(dados) {
+  // Agrupa por tipo+vencimento, pega o mais recente
+  const byTitulo = {};
+  dados.forEach(d => {
+    const key = `${d.tipo}|${d.venc}`;
+    if (!byTitulo[key] || d.data > byTitulo[key].data) byTitulo[key] = d;
+  });
+
+  // Atualiza TITULOS_DATA com taxas reais onde encontrar
+  TITULOS_DATA.forEach(t => {
+    // Tenta match por tipo e vencimento parcial
+    const keyPre  = Object.keys(byTitulo).find(k => k.includes('LTN') && k.includes(t.venc.replace('Jan/','01/')));
+    const keyNTNF = Object.keys(byTitulo).find(k => k.includes('NTN-F') && k.includes(t.venc.replace('Jan/','01/')));
+    const keyNTNB = Object.keys(byTitulo).find(k => k.includes('NTN-B') && k.includes(t.venc.replace('Mai/','05/')));
+
+    const match = t.tipo === 'pre' ? (keyPre || keyNTNF) : t.tipo === 'ipca' ? keyNTNB : null;
+    if (match && byTitulo[match]) {
+      t.taxa = byTitulo[match].taxa;
+    }
+  });
+
+  renderTitulos();
+
+  // Notifica usuário
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:80px;right:20px;z-index:300;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:12px 18px;font-family:var(--mono);font-size:11px;color:var(--accent);animation:slideIn .3s ease';
+  toast.textContent = `✓ Taxas ANBIMA atualizadas — ${Object.keys(byTitulo).length} títulos`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// ANBIMA JSON — DADOS DO REPOSITÓRIO GITHUB
+// ════════════════════════════════════════════════════
+async function loadAnbimaJSON() {
+  try {
+    const res = await fetch('./data/anbima_latest.json');
+    if (!res.ok) { console.warn('JSON ANBIMA não encontrado'); return null; }
+    const data = await res.json();
+    console.log('ANBIMA JSON carregado:', data.timestamp, '| Ref:', data.data_referencia);
+
+    if (data.mercado_secundario_TPF && Array.isArray(data.mercado_secundario_TPF)) {
+      updateTitulosFromANBIMA(data.mercado_secundario_TPF);
+    }
+    if (data.curvas_juros && Array.isArray(data.curvas_juros)) {
+      updateCurvasFromANBIMA(data.curvas_juros);
+    }
+    if (data.vna && Array.isArray(data.vna)) {
+      updateVNAFromANBIMA(data.vna);
+    }
+    if (data.estimativa_selic && Array.isArray(data.estimativa_selic)) {
+      const est = data.estimativa_selic[0];
+      if (est && est.estimativa_taxa_selic) {
+        const el = document.getElementById('h-selic-val');
+        if (el) el.textContent = est.estimativa_taxa_selic.toFixed(2).replace('.',',') + '%';
+      }
+    }
+    if (data.data_referencia) {
+      const d = new Date(data.data_referencia);
+      const dStr = d.toLocaleDateString('pt-BR');
+      document.getElementById('h-date').textContent = dStr;
+      const ref = document.getElementById('curva-ref');
+      if (ref) ref.textContent = dStr + ' · ANBIMA';
+      const delta = document.getElementById('h-date-delta');
+      if (delta) { delta.textContent = 'dados ANBIMA'; delta.className = 'hstat-delta up'; }
+      setSourceBar('dados ANBIMA carregados · ' + dStr, 'ok');
+    }
+    return data;
+  } catch(e) {
+    console.warn('Erro ao carregar JSON ANBIMA:', e);
+    return null;
+  }
+}
+
+function updateTitulosFromANBIMA(titulos) {
+  titulos.forEach(t => {
+    const tipo = (t.tipo_titulo || '').toUpperCase();
+    const venc = t.data_vencimento || '';
+    const taxa = t.taxa_indicativa || t.taxa_compra;
+    if (!taxa) return;
+    TITULOS_DATA.forEach(td => {
+      const matchPre  = (tipo === 'LTN' || tipo === 'NTN-F') && td.tipo === 'pre';
+      const matchIPCA = tipo === 'NTN-B' && td.tipo === 'ipca';
+      const matchLFT  = tipo === 'LFT' && td.tipo === 'lft';
+      if ((matchPre || matchIPCA || matchLFT) && venc.slice(0,4) === td.venc.slice(-4)) {
+        td.taxa = taxa;
+      }
+    });
+  });
+  renderTitulos();
+  console.log('Tabela atualizada com taxas ANBIMA reais');
+}
+
+function updateCurvasFromANBIMA(curvas) {
+  curvas.forEach(c => {
+    const grupo = (c.grupo_indexador || c.tipo_curva || '').toUpperCase();
+    if (grupo === 'PRE' || grupo === 'IPCA') {
+      console.log('Curva ' + grupo + ' recebida · ref: ' + c.data_referencia);
+    }
+  });
+}
+
+function updateVNAFromANBIMA(vnaData) {
+  vnaData.forEach(v => {
+    if (!v.titulos) return;
+    v.titulos.forEach(t => {
+      if (t.tipo_titulo === 'NTN-B' && t.vna) {
+        const el = document.getElementById('ntnb-vna');
+        if (el) { el.value = t.vna.toFixed(2); console.log('VNA NTN-B: ' + t.vna); }
+      }
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  initCurvas();
+  renderTitulos();
+  initTitulosCharts();
+  renderMTMScenarios();
+  initMTMCharts();
+  setupCSVImport();
+
+  // 1. JSON ANBIMA do repositório (sem CORS)
+  loadAnbimaJSON().catch(e => console.warn('ANBIMA JSON erro:', e));
+
+  // 2. BCB API em paralelo
+  loadRealData().catch(err => {
+    console.warn('BCB load error:', err);
+    setSourceBar('API BCB indisponivel — dados simulados', 'err');
+  });
+});
+</script>
+</body>
+</html>
 
