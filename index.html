@@ -175,6 +175,11 @@ main{position:relative;z-index:5;padding:22px 28px;max-width:1440px;margin:0 aut
 .mtm-det .k{color:var(--text3);display:block;font-size:9px;margin-bottom:2px}
 .mtm-det .v{color:var(--text2);font-weight:700}
 
+/* ── LOADING / REAL DATA ── */
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.hstat-val.shimmer{color:var(--text3) !important}
+.src-bar.real .dot{background:var(--accent);animation:none}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -210,34 +215,34 @@ main{position:relative;z-index:5;padding:22px 28px;max-width:1440px;margin:0 aut
   </div>
   <div class="hstats">
     <div class="hstat" onclick="openInfo('selic')">
-      <span class="hstat-lbl">SELIC Meta</span>
-      <span class="hstat-val">10,50%</span>
-      <span class="hstat-delta">próx. COPOM: 07/05</span>
+      <span class="hstat-lbl">SELIC Diária</span>
+      <span class="hstat-val" id="h-selic-val">—</span>
+      <span class="hstat-delta" id="h-selic-delta">carregando…</span>
     </div>
     <div class="hstat" onclick="openInfo('ipca')">
       <span class="hstat-lbl">IPCA 12m</span>
-      <span class="hstat-val blue">4,62%</span>
-      <span class="hstat-delta up">meta: 3,00% ±1,5</span>
+      <span class="hstat-val blue" id="h-ipca-val">—</span>
+      <span class="hstat-delta up" id="h-ipca-delta">carregando…</span>
     </div>
     <div class="hstat" onclick="openInfo('cdi')">
       <span class="hstat-lbl">CDI Diário</span>
-      <span class="hstat-val">0,0414%</span>
+      <span class="hstat-val" id="h-cdi-val">—</span>
       <span class="hstat-delta">≈ SELIC – 0,10%</span>
     </div>
     <div class="hstat" onclick="openInfo('curvaIncl')">
-      <span class="hstat-lbl">Inclinação</span>
-      <span class="hstat-val yellow">+67bp</span>
-      <span class="hstat-delta up">curva normal</span>
+      <span class="hstat-lbl">Var. SELIC 21d</span>
+      <span class="hstat-val yellow" id="h-incl-val">—</span>
+      <span class="hstat-delta up" id="h-incl-delta">carregando…</span>
     </div>
     <div class="hstat" onclick="openInfo('cambio')">
       <span class="hstat-lbl">Câmbio R$/US$</span>
-      <span class="hstat-val red">5,42</span>
-      <span class="hstat-delta dn">▲ +0,8% hoje</span>
+      <span class="hstat-val red" id="h-cambio-val">—</span>
+      <span class="hstat-delta dn" id="h-cambio-delta">carregando…</span>
     </div>
     <div class="hstat">
-      <span class="hstat-lbl">Ref.</span>
+      <span class="hstat-lbl">Ref. BCB</span>
       <span class="hstat-val blue" id="h-date">—</span>
-      <span class="hstat-delta">dados simulados</span>
+      <span class="hstat-delta" id="h-date-delta">carregando…</span>
     </div>
   </div>
 </header>
@@ -1385,14 +1390,514 @@ function renderAlertasAtivos(){
 }
 
 // ════════════════════════════════════════════════════
+// BCB API — DADOS REAIS
+// ════════════════════════════════════════════════════
+
+// Estado dos dados reais carregados
+const BCB = {
+  selic: null,      // série diária SELIC (cód 11)
+  metaSelic: null,  // meta SELIC COPOM (cód 432)
+  cdi: null,        // CDI diário (cód 12)
+  ipca12m: null,    // IPCA acumulado 12m (cód 13522)
+  cambio: null,     // BRL/USD ptax (cód 1)
+  imaB: null,       // IMA-B diário (cód 189)
+  imaBCurto: null,  // IMA-B 5 (cód 7478)
+  imaBLongo: null,  // IMA-B 5+ (cód 7477)
+};
+
+// Busca uma série do BCB SGS — retorna [{data, valor}]
+async function bcbGet(codigo, ultimos = null, dataInicial = '') {
+  let url;
+  if (ultimos) {
+    url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados/ultimos/${ultimos}?formato=json`;
+  } else {
+    url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json`;
+    if (dataInicial) url += `&dataInicial=${dataInicial}`;
+  }
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`BCB ${codigo}: HTTP ${res.status}`);
+  const raw = await res.json();
+  return raw.map(d => ({
+    data: new Date(d.data.split('/').reverse().join('-')),
+    valor: parseFloat(d.valor),
+    dataStr: d.data
+  })).filter(d => !isNaN(d.valor));
+}
+
+// Formata valor para exibição BR
+function fmtPct(v, dec = 2) {
+  return v.toFixed(dec).replace('.', ',') + '%';
+}
+
+// Atualiza um card no header
+function setHstat(id, val, delta = null, deltaClass = '') {
+  const el = $(id);
+  if (el) el.textContent = val;
+  if (delta !== null) {
+    const dEl = $(id + '-delta');
+    if (dEl) {
+      dEl.textContent = delta;
+      dEl.className = 'hstat-delta ' + deltaClass;
+    }
+  }
+}
+
+// Status bar de carregamento
+function setSourceBar(msg, type = 'loading') {
+  const bars = document.querySelectorAll('.src-bar span:first-of-type');
+  const color = type === 'ok' ? 'var(--accent)' : type === 'err' ? 'var(--danger)' : 'var(--text3)';
+  bars.forEach(b => {
+    if (b.textContent.includes('simulad') || b.textContent.includes('BCB') || b.textContent.includes('Carregando')) {
+      b.textContent = msg;
+      b.style.color = color;
+    }
+  });
+}
+
+// Calcula variação % entre dois últimos valores
+function calcVar(serie) {
+  if (!serie || serie.length < 2) return null;
+  const prev = serie[serie.length - 2].valor;
+  const curr = serie[serie.length - 1].valor;
+  return ((curr - prev) / Math.abs(prev)) * 100;
+}
+
+// Função principal: carrega todos os dados do BCB
+async function loadRealData() {
+  setSourceBar('⟳ Carregando dados do Banco Central...', 'loading');
+
+  const results = await Promise.allSettled([
+    bcbGet(11, 504),       // SELIC diária — 2 anos (~504 du)
+    bcbGet(432, null, '01/01/2019'), // Meta SELIC desde 2019
+    bcbGet(12, 21),        // CDI últimos 21 dias
+    bcbGet(13522, 24),     // IPCA 12m últimos 24 meses
+    bcbGet(1, 5),          // Câmbio últimos 5 dias
+    bcbGet(189, 504),      // IMA-B 2 anos
+    bcbGet(7478, 252),     // IMA-B 5 (curto)
+    bcbGet(7477, 252),     // IMA-B 5+ (longo)
+  ]);
+
+  const [rSelic, rMeta, rCDI, rIPCA, rCambio, rIMAB, rIMAB5, rIMAB5p] = results;
+
+  let loadedCount = 0;
+
+  // ── SELIC
+  if (rSelic.status === 'fulfilled' && rSelic.value.length > 0) {
+    BCB.selic = rSelic.value;
+    const ultimo = BCB.selic.at(-1).valor;
+    const penult = BCB.selic.at(-2)?.valor ?? ultimo;
+    const diff = ultimo - penult;
+    setHstat('h-selic-val', fmtPct(ultimo));
+    const hselicDelta = $('h-selic-delta');
+    if (hselicDelta) {
+      hselicDelta.textContent = diff === 0 ? 'sem variação' : `${diff > 0 ? '▲' : '▼'} ${Math.abs(diff).toFixed(4)}% vs ontem`;
+      hselicDelta.className = 'hstat-delta ' + (diff > 0 ? 'dn' : diff < 0 ? 'up' : '');
+    }
+    loadedCount++;
+  }
+
+  // ── Meta SELIC (COPOM)
+  if (rMeta.status === 'fulfilled' && rMeta.value.length > 0) {
+    BCB.metaSelic = rMeta.value;
+    loadedCount++;
+  }
+
+  // ── CDI
+  if (rCDI.status === 'fulfilled' && rCDI.value.length > 0) {
+    BCB.cdi = rCDI.value;
+    const cdiDiario = BCB.cdi.at(-1).valor;
+    setHstat('h-cdi-val', fmtPct(cdiDiario, 4));
+    loadedCount++;
+  }
+
+  // ── IPCA 12m
+  if (rIPCA.status === 'fulfilled' && rIPCA.value.length > 0) {
+    BCB.ipca12m = rIPCA.value;
+    const ipcaAtual = BCB.ipca12m.at(-1).valor;
+    const ipcaAnt = BCB.ipca12m.at(-2)?.valor ?? ipcaAtual;
+    const diff = ipcaAtual - ipcaAnt;
+    setHstat('h-ipca-val', fmtPct(ipcaAtual));
+    const hIPCADelta = $('h-ipca-delta');
+    if (hIPCADelta) {
+      const dentroMeta = ipcaAtual <= 4.5;
+      hIPCADelta.textContent = `meta: 3,00% ±1,5 ${dentroMeta ? '✓' : '⚠'}`;
+      hIPCADelta.className = 'hstat-delta ' + (dentroMeta ? 'up' : 'dn');
+    }
+    loadedCount++;
+  }
+
+  // ── Câmbio
+  if (rCambio.status === 'fulfilled' && rCambio.value.length > 0) {
+    BCB.cambio = rCambio.value;
+    const cambioAtual = BCB.cambio.at(-1).valor;
+    const cambioAnt = BCB.cambio.at(-2)?.valor ?? cambioAtual;
+    const varCambio = ((cambioAtual - cambioAnt) / cambioAnt * 100);
+    setHstat('h-cambio-val', cambioAtual.toFixed(2).replace('.', ','));
+    const hCambioDelta = $('h-cambio-delta');
+    if (hCambioDelta) {
+      hCambioDelta.textContent = `${varCambio > 0 ? '▲' : '▼'} ${Math.abs(varCambio).toFixed(2)}% hoje`;
+      hCambioDelta.className = 'hstat-delta ' + (varCambio > 0 ? 'dn' : 'up');
+    }
+    loadedCount++;
+  }
+
+  // ── IMA-B
+  if (rIMAB.status === 'fulfilled' && rIMAB.value.length > 0) {
+    BCB.imaB = rIMAB.value;
+    loadedCount++;
+  }
+  if (rIMAB5.status === 'fulfilled') BCB.imaBCurto = rIMAB5.value;
+  if (rIMAB5p.status === 'fulfilled') BCB.imaBLongo = rIMAB5p.value;
+
+  // ── Atualiza gráfico histórico com SELIC real
+  if (BCB.selic && BCB.selic.length > 0) {
+    updateHistVencWithSelic();
+  }
+
+  // ── Atualiza gráfico de correlações com IMA-B real (se já iniciado)
+  if (correlInited && BCB.imaB) updateCorrelWithReal();
+
+  // ── Atualiza inclinação no header
+  updateInclinacaoHeader();
+
+  // ── Data de referência
+  const dataRef = BCB.selic?.at(-1)?.dataStr ?? today.toLocaleDateString('pt-BR');
+  $('h-date').textContent = dataRef;
+  $('curva-ref').textContent = dataRef + ' 18h00';
+
+  // ── Atualiza src-bar
+  if (loadedCount >= 4) {
+    setSourceBar(`✓ Dados reais BCB · ${loadedCount}/8 séries carregadas · SELIC e IPCA atualizados`, 'ok');
+    // Atualiza src-bar das curvas
+    const curvaSrcBar = document.querySelector('#tab-curvas .src-bar span:not([style])');
+    if (curvaSrcBar) curvaSrcBar.textContent = `✓ SELIC real (BCB) · Curvas DI/NTN-B: estrutura pronta para ANBIMA Feed`;
+    // Marca header como dado real
+    const hDateDelta = document.querySelector('#h-date')?.closest('.hstat')?.querySelector('.hstat-delta');
+    if (hDateDelta) { hDateDelta.textContent = 'dados BCB reais'; hDateDelta.className = 'hstat-delta up'; }
+  } else {
+    setSourceBar(`⚠ BCB parcial: ${loadedCount}/8 séries · restante: dados simulados`, 'err');
+  }
+}
+
+// Atualiza o gráfico de evolução histórica com a SELIC real do BCB
+function updateHistVencWithSelic() {
+  if (!histVencChart || !BCB.selic) return;
+  if (curvaTipo === 'ipca' && !BCB.imaB) return; // espera IMA-B para IPCA
+
+  // Para pré-fixado, usa SELIC como proxy do curto prazo
+  const serie = curvaTipo === 'ipca' ? BCB.imaB : BCB.selic;
+  if (!serie) return;
+
+  const nMap = {'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n = Math.min(nMap[curvaPeriodo] || 21, serie.length);
+  const slice = serie.slice(-n);
+
+  const labels = slice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}));
+  const vals   = slice.map(d => d.valor);
+
+  histVencChart.data.labels = labels;
+  histVencChart.data.datasets[0].data = vals;
+  histVencChart.data.datasets[0].label = curvaTipo === 'ipca' ? 'IMA-B (BCB real)' : 'SELIC diária (BCB real)';
+
+  // Spread: usa IMA-B 5 e IMA-B 5+ se disponíveis
+  if (BCB.imaBCurto && BCB.imaBLongo && curvaTipo === 'ipca') {
+    const sliceCurto = BCB.imaBCurto.slice(-n);
+    const sliceLongo = BCB.imaBLongo.slice(-n);
+    if (sliceCurto.length === n && sliceLongo.length === n) {
+      histVencChart.data.datasets[1].data = sliceCurto.map(d => d.valor);
+      histVencChart.data.datasets[1].label = 'IMA-B 5 (BCB real)';
+      histVencChart.data.datasets[2].data = sliceLongo.map(d => d.valor);
+      histVencChart.data.datasets[2].label = 'IMA-B 5+ (BCB real)';
+    }
+  }
+
+  histVencChart.update();
+
+  // Atualiza spread chart com diferença real SELIC hoje vs 21d atrás
+  updateSpreadWithSelic();
+}
+
+// Atualiza spread com dados reais
+function updateSpreadWithSelic() {
+  if (!spreadChart || !BCB.selic) return;
+  const nMap = {'1m':21,'3m':63,'6m':126,'1a':252,'3a':756};
+  const n = Math.min(nMap[curvaPeriodo] || 21, BCB.selic.length);
+  const slice = BCB.selic.slice(-n);
+  const labels = slice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}));
+  // Spread diário = variação em bp (comparado ao valor 21d antes na série)
+  const window21 = 21;
+  const spreads = slice.map((d, i) => {
+    const prev = slice[Math.max(0, i - window21)];
+    return +((d.valor - prev.valor) * 100).toFixed(1);
+  });
+  spreadChart.data.labels = labels;
+  spreadChart.data.datasets[0].data = spreads;
+  spreadChart.data.datasets[0].backgroundColor = spreads.map(v => v >= 0 ? 'rgba(0,229,160,.45)' : 'rgba(255,68,85,.45)');
+  spreadChart.data.datasets[0].borderColor = spreads.map(v => v >= 0 ? '#00e5a0' : '#ff4455');
+  spreadChart.update();
+}
+
+// Calcula e exibe a inclinação real no header com base na SELIC
+function updateInclinacaoHeader() {
+  if (!BCB.selic || BCB.selic.length < 2) return;
+  const selicHoje = BCB.selic.at(-1).valor;
+  const selic21d = BCB.selic.length >= 22 ? BCB.selic.at(-22).valor : BCB.selic.at(0).valor;
+  const difBp = +((selicHoje - selic21d) * 100).toFixed(0);
+  const inclEl = $('h-incl-val');
+  if (inclEl) {
+    inclEl.textContent = (difBp >= 0 ? '+' : '') + difBp + 'bp';
+    inclEl.className = 'hstat-val yellow';
+  }
+  const inclDelta = $('h-incl-delta');
+  if (inclDelta) {
+    inclDelta.textContent = difBp > 30 ? 'curva inclinando' : difBp < -30 ? 'curva achatando' : 'curva estável';
+    inclDelta.className = 'hstat-delta ' + (difBp > 0 ? 'dn' : 'up');
+  }
+}
+
+// Atualiza gráfico de correlações com dados IMA-B reais
+function updateCorrelWithReal() {
+  if (!corrRChart || !BCB.imaB || !BCB.selic) return;
+  const n = Math.min(63, BCB.imaB.length, BCB.selic.length);
+  const imaSlice  = BCB.imaB.slice(-n);
+  const selSlice  = BCB.selic.slice(-n);
+  const labels    = imaSlice.map(d => d.data.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}));
+
+  // Correlação rolante 21d entre SELIC e IMA-B (como proxy de DI vs NTN-B)
+  const correls = imaSlice.map((_, i) => {
+    if (i < 20) return null;
+    const wSelic = selSlice.slice(i-20, i+1).map(d => d.valor);
+    const wIMAB  = imaSlice.slice(i-20, i+1).map(d => d.valor);
+    const meanS = wSelic.reduce((a,b)=>a+b,0)/21;
+    const meanI = wIMAB.reduce((a,b)=>a+b,0)/21;
+    let num=0, denS=0, denI=0;
+    for(let j=0;j<21;j++){
+      num  += (wSelic[j]-meanS)*(wIMAB[j]-meanI);
+      denS += (wSelic[j]-meanS)**2;
+      denI += (wIMAB[j]-meanI)**2;
+    }
+    const denom = Math.sqrt(denS*denI);
+    return denom === 0 ? 0 : +(num/denom).toFixed(4);
+  }).filter(v => v !== null);
+
+  const labelsCorrel = labels.slice(20);
+  corrRChart.data.labels = labelsCorrel;
+  corrRChart.data.datasets[0].data = correls;
+  corrRChart.data.datasets[0].label = 'SELIC × IMA-B (real BCB)';
+  corrRChart.update();
+}
+
+// ════════════════════════════════════════════════════
+// IMPORT CSV ANBIMA
+// ════════════════════════════════════════════════════
+function setupCSVImport() {
+  // Cria botão de import flutuante
+  const btn = document.createElement('div');
+  btn.id = 'csv-import-btn';
+  btn.innerHTML = `
+    <div style="position:fixed;bottom:20px;right:20px;z-index:200">
+      <label for="csv-file-input" style="
+        display:flex;align-items:center;gap:8px;
+        background:var(--surface2);border:1px solid var(--border2);
+        border-radius:8px;padding:10px 16px;cursor:pointer;
+        font-family:var(--mono);font-size:11px;color:var(--accent2);
+        transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,.4)
+      " onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border2)'">
+        📂 Importar CSV ANBIMA
+      </label>
+      <input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none" onchange="handleCSVUpload(this)">
+    </div>
+  `;
+  document.body.appendChild(btn);
+}
+
+function handleCSVUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      parseAnbimaCSV(e.target.result, file.name);
+    } catch(err) {
+      alert('Erro ao processar CSV: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'latin1');
+}
+
+function parseAnbimaCSV(text, filename) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // Detecta separador
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const header = lines[0].split(sep).map(h => h.toLowerCase().trim());
+
+  // Mapeia colunas flexivelmente
+  const colData  = header.findIndex(h => h.includes('data'));
+  const colTipo  = header.findIndex(h => h.includes('tipo') || h.includes('titulo'));
+  const colVenc  = header.findIndex(h => h.includes('venc'));
+  const colTaxa  = header.findIndex(h => h.includes('indicativa') || h.includes('taxa') && h.includes('venda'));
+  const colPU    = header.findIndex(h => h.includes('pu') || h.includes('preco'));
+
+  if (colTaxa < 0) { alert('CSV não reconhecido — coluna de taxa não encontrada.'); return; }
+
+  const dados = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(sep);
+    if (cols.length < 3) continue;
+    const taxa = parseFloat((cols[colTaxa] || '').replace(',', '.').replace('%', '').trim());
+    const pu   = colPU >= 0 ? parseFloat((cols[colPU] || '0').replace(',', '.').trim()) : 0;
+    if (isNaN(taxa)) continue;
+    dados.push({
+      data: cols[colData]?.trim() || '',
+      tipo: (cols[colTipo] || '').trim(),
+      venc: (cols[colVenc] || '').trim(),
+      taxa, pu
+    });
+  }
+
+  if (dados.length === 0) { alert('Nenhum dado válido encontrado no CSV.'); return; }
+
+  // Atualiza status bar
+  setSourceBar(`✓ CSV ANBIMA: ${dados.length} registros · ${filename}`, 'ok');
+
+  // Mostra resumo e atualiza tabela de títulos com taxas reais
+  updateTitulosFromCSV(dados);
+}
+
+function updateTitulosFromCSV(dados) {
+  // Agrupa por tipo+vencimento, pega o mais recente
+  const byTitulo = {};
+  dados.forEach(d => {
+    const key = `${d.tipo}|${d.venc}`;
+    if (!byTitulo[key] || d.data > byTitulo[key].data) byTitulo[key] = d;
+  });
+
+  // Atualiza TITULOS_DATA com taxas reais onde encontrar
+  TITULOS_DATA.forEach(t => {
+    // Tenta match por tipo e vencimento parcial
+    const keyPre  = Object.keys(byTitulo).find(k => k.includes('LTN') && k.includes(t.venc.replace('Jan/','01/')));
+    const keyNTNF = Object.keys(byTitulo).find(k => k.includes('NTN-F') && k.includes(t.venc.replace('Jan/','01/')));
+    const keyNTNB = Object.keys(byTitulo).find(k => k.includes('NTN-B') && k.includes(t.venc.replace('Mai/','05/')));
+
+    const match = t.tipo === 'pre' ? (keyPre || keyNTNF) : t.tipo === 'ipca' ? keyNTNB : null;
+    if (match && byTitulo[match]) {
+      t.taxa = byTitulo[match].taxa;
+    }
+  });
+
+  renderTitulos();
+
+  // Notifica usuário
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:80px;right:20px;z-index:300;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:12px 18px;font-family:var(--mono);font-size:11px;color:var(--accent);animation:slideIn .3s ease';
+  toast.textContent = `✓ Taxas ANBIMA atualizadas — ${Object.keys(byTitulo).length} títulos`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// ANBIMA JSON — DADOS DO REPOSITÓRIO GITHUB
+// ════════════════════════════════════════════════════
+async function loadAnbimaJSON() {
+  try {
+    const res = await fetch('./data/anbima_latest.json');
+    if (!res.ok) { console.warn('JSON ANBIMA não encontrado'); return null; }
+    const data = await res.json();
+    console.log('ANBIMA JSON carregado:', data.timestamp, '| Ref:', data.data_referencia);
+
+    if (data.mercado_secundario_TPF && Array.isArray(data.mercado_secundario_TPF)) {
+      updateTitulosFromANBIMA(data.mercado_secundario_TPF);
+    }
+    if (data.curvas_juros && Array.isArray(data.curvas_juros)) {
+      updateCurvasFromANBIMA(data.curvas_juros);
+    }
+    if (data.vna && Array.isArray(data.vna)) {
+      updateVNAFromANBIMA(data.vna);
+    }
+    if (data.estimativa_selic && Array.isArray(data.estimativa_selic)) {
+      const est = data.estimativa_selic[0];
+      if (est && est.estimativa_taxa_selic) {
+        const el = document.getElementById('h-selic-val');
+        if (el) el.textContent = est.estimativa_taxa_selic.toFixed(2).replace('.',',') + '%';
+      }
+    }
+    if (data.data_referencia) {
+      const d = new Date(data.data_referencia);
+      const dStr = d.toLocaleDateString('pt-BR');
+      document.getElementById('h-date').textContent = dStr;
+      const ref = document.getElementById('curva-ref');
+      if (ref) ref.textContent = dStr + ' · ANBIMA';
+      const delta = document.getElementById('h-date-delta');
+      if (delta) { delta.textContent = 'dados ANBIMA'; delta.className = 'hstat-delta up'; }
+      setSourceBar('dados ANBIMA carregados · ' + dStr, 'ok');
+    }
+    return data;
+  } catch(e) {
+    console.warn('Erro ao carregar JSON ANBIMA:', e);
+    return null;
+  }
+}
+
+function updateTitulosFromANBIMA(titulos) {
+  titulos.forEach(t => {
+    const tipo = (t.tipo_titulo || '').toUpperCase();
+    const venc = t.data_vencimento || '';
+    const taxa = t.taxa_indicativa || t.taxa_compra;
+    if (!taxa) return;
+    TITULOS_DATA.forEach(td => {
+      const matchPre  = (tipo === 'LTN' || tipo === 'NTN-F') && td.tipo === 'pre';
+      const matchIPCA = tipo === 'NTN-B' && td.tipo === 'ipca';
+      const matchLFT  = tipo === 'LFT' && td.tipo === 'lft';
+      if ((matchPre || matchIPCA || matchLFT) && venc.slice(0,4) === td.venc.slice(-4)) {
+        td.taxa = taxa;
+      }
+    });
+  });
+  renderTitulos();
+  console.log('Tabela atualizada com taxas ANBIMA reais');
+}
+
+function updateCurvasFromANBIMA(curvas) {
+  curvas.forEach(c => {
+    const grupo = (c.grupo_indexador || c.tipo_curva || '').toUpperCase();
+    if (grupo === 'PRE' || grupo === 'IPCA') {
+      console.log('Curva ' + grupo + ' recebida · ref: ' + c.data_referencia);
+    }
+  });
+}
+
+function updateVNAFromANBIMA(vnaData) {
+  vnaData.forEach(v => {
+    if (!v.titulos) return;
+    v.titulos.forEach(t => {
+      if (t.tipo_titulo === 'NTN-B' && t.vna) {
+        const el = document.getElementById('ntnb-vna');
+        if (el) { el.value = t.vna.toFixed(2); console.log('VNA NTN-B: ' + t.vna); }
+      }
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════
-window.addEventListener('load',()=>{
+window.addEventListener('load', async () => {
   initCurvas();
   renderTitulos();
   initTitulosCharts();
   renderMTMScenarios();
   initMTMCharts();
+  setupCSVImport();
+
+  // 1. JSON ANBIMA do repositório (sem CORS)
+  loadAnbimaJSON().catch(e => console.warn('ANBIMA JSON erro:', e));
+
+  // 2. BCB API em paralelo
+  loadRealData().catch(err => {
+    console.warn('BCB load error:', err);
+    setSourceBar('API BCB indisponivel — dados simulados', 'err');
+  });
 });
 </script>
 </body>
