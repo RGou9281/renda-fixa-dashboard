@@ -33,14 +33,14 @@ def anbima_get(token, path):
     url = f"{BASE_URL}/feed/precos-indices/v1/titulos-publicos/{path}"
     print(f"\n  → GET {path}")
     req = Request(url, headers={
-        "Authorization": f"Bearer {token}",
-        "client_id":     CLIENT_ID,        # ← header obrigatório ANBIMA
-        "Accept":        "application/json"
+        "access_token": token,      # ← formato ANBIMA/Sensedia
+        "client_id":    CLIENT_ID,  # ← obrigatório
+        "Accept":       "application/json"
     })
     try:
         with urlopen(req, timeout=15) as r:
             raw  = r.read()
-            data = json.loads(r.read() if not raw else raw)
+            data = json.loads(raw)
             preview = json.dumps(data, ensure_ascii=False)[:300]
             print(f"  ✓ OK — prévia: {preview}")
             return data
