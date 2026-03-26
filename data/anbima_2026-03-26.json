@@ -1,5 +1,1509 @@
 {
-  "timestamp": "2026-03-26T19:40:51.581231Z",
+  "timestamp": "2026-03-26T19:59:36.076657Z",
   "data_referencia": null,
-  "ambiente": "producao"
+  "ambiente": "sandbox",
+  "curvas_juros": [
+    {
+      "data_referencia": "2024-04-04",
+      "parametros": [
+        {
+          "grupo_indexador": "IPCA",
+          "b1": 0.0603586994592048,
+          "b2": 0.0379906303476655,
+          "b3": -0.0572681488537534,
+          "b4": -0.0022501244347218,
+          "l1": 1.9566991389361275,
+          "l2": 0.4048239274022383
+        },
+        {
+          "grupo_indexador": "PREFIXADOS",
+          "b1": 0.1148724464560293,
+          "b2": -0.0096387352807547,
+          "b3": -0.0621988796922182,
+          "b4": 0.0320133956262039,
+          "l1": 0.9471978109926056,
+          "l2": 0.4691854177929591
+        }
+      ],
+      "erros": [
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2024-07-01",
+          "valor_erro": 0.0233
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2024-10-01",
+          "valor_erro": -0.0108
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2025-01-01",
+          "valor_erro": 0.0545
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2025-04-01",
+          "valor_erro": -0.0335
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2025-07-01",
+          "valor_erro": -0.0232
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2025-10-01",
+          "valor_erro": -0.0341
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2026-01-01",
+          "valor_erro": 0.0065
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2026-04-01",
+          "valor_erro": -0.0124
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2026-07-01",
+          "valor_erro": -0.0179
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2027-07-01",
+          "valor_erro": 0.0247
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2028-01-01",
+          "valor_erro": -0.0143
+        },
+        {
+          "tipo_titulo": "100000",
+          "codigo_selic": "LTN",
+          "data_vencimento": "2030-01-01",
+          "valor_erro": -0.0294
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2024-08-15",
+          "valor_erro": -0.0822
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2025-05-15",
+          "valor_erro": 0.0493
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2026-08-15",
+          "valor_erro": -0.0216
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2027-05-15",
+          "valor_erro": -0.0002
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2028-08-15",
+          "valor_erro": -0.0151
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2029-05-15",
+          "valor_erro": -0.0016
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2030-08-15",
+          "valor_erro": 0.0345
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2032-08-15",
+          "valor_erro": -0.0123
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2033-05-15",
+          "valor_erro": -0.0078
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2035-05-15",
+          "valor_erro": -0.0037
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2040-08-15",
+          "valor_erro": 0.0146
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2045-05-15",
+          "valor_erro": -0.0059
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2050-08-15",
+          "valor_erro": -0.0021
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2055-05-15",
+          "valor_erro": 0.0077
+        },
+        {
+          "tipo_titulo": "760199",
+          "codigo_selic": "NTN-B",
+          "data_vencimento": "2060-08-15",
+          "valor_erro": -0.0066
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2025-01-01",
+          "valor_erro": 0.0049
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2027-01-01",
+          "valor_erro": 0.0442
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2029-01-01",
+          "valor_erro": 0.0057
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2031-01-01",
+          "valor_erro": -0.0334
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2033-01-01",
+          "valor_erro": 0.0384
+        },
+        {
+          "tipo_titulo": "950199",
+          "codigo_selic": "NTN-F",
+          "data_vencimento": "2035-01-01",
+          "valor_erro": -0.011
+        }
+      ],
+      "ettj": [
+        {
+          "vertice_du": 21,
+          "taxa_prefixadas": 10.3884
+        },
+        {
+          "vertice_du": 42,
+          "taxa_prefixadas": 10.2722
+        },
+        {
+          "vertice_du": 63,
+          "taxa_prefixadas": 10.1728
+        },
+        {
+          "vertice_du": 126,
+          "taxa_prefixadas": 9.9601,
+          "taxa_ipca": 6.9391,
+          "taxa_implicita": 2.8249
+        },
+        {
+          "vertice_du": 252,
+          "taxa_prefixadas": 9.8093,
+          "taxa_ipca": 5.9643,
+          "taxa_implicita": 3.6285
+        },
+        {
+          "vertice_du": 378,
+          "taxa_prefixadas": 9.8692,
+          "taxa_ipca": 5.6721,
+          "taxa_implicita": 3.9718
+        },
+        {
+          "vertice_du": 504,
+          "taxa_prefixadas": 10.0252,
+          "taxa_ipca": 5.6133,
+          "taxa_implicita": 4.1774
+        },
+        {
+          "vertice_du": 630,
+          "taxa_prefixadas": 10.2143,
+          "taxa_ipca": 5.628,
+          "taxa_implicita": 4.3419
+        },
+        {
+          "vertice_du": 756,
+          "taxa_prefixadas": 10.4037,
+          "taxa_ipca": 5.661,
+          "taxa_implicita": 4.4886
+        },
+        {
+          "vertice_du": 882,
+          "taxa_prefixadas": 10.5774,
+          "taxa_ipca": 5.695,
+          "taxa_implicita": 4.6193
+        },
+        {
+          "vertice_du": 1008,
+          "taxa_prefixadas": 10.7293,
+          "taxa_ipca": 5.725,
+          "taxa_implicita": 4.7333
+        },
+        {
+          "vertice_du": 1134,
+          "taxa_prefixadas": 10.8583,
+          "taxa_ipca": 5.7506,
+          "taxa_implicita": 4.8299
+        },
+        {
+          "vertice_du": 1260,
+          "taxa_prefixadas": 10.9656,
+          "taxa_ipca": 5.7724,
+          "taxa_implicita": 4.9097
+        },
+        {
+          "vertice_du": 1386,
+          "taxa_prefixadas": 11.0539,
+          "taxa_ipca": 5.7909,
+          "taxa_implicita": 4.9749
+        },
+        {
+          "vertice_du": 1512,
+          "taxa_prefixadas": 11.126,
+          "taxa_ipca": 5.807,
+          "taxa_implicita": 5.027
+        },
+        {
+          "vertice_du": 1638,
+          "taxa_prefixadas": 11.1844,
+          "taxa_ipca": 5.8211,
+          "taxa_implicita": 5.0682
+        },
+        {
+          "vertice_du": 1764,
+          "taxa_prefixadas": 11.2316,
+          "taxa_ipca": 5.8336,
+          "taxa_implicita": 5.1004
+        },
+        {
+          "vertice_du": 1890,
+          "taxa_prefixadas": 11.2698,
+          "taxa_ipca": 5.8447,
+          "taxa_implicita": 5.1255
+        },
+        {
+          "vertice_du": 2016,
+          "taxa_prefixadas": 11.3007,
+          "taxa_ipca": 5.8547,
+          "taxa_implicita": 5.1447
+        },
+        {
+          "vertice_du": 2142,
+          "taxa_prefixadas": 11.3257,
+          "taxa_ipca": 5.8638,
+          "taxa_implicita": 5.1593
+        },
+        {
+          "vertice_du": 2268,
+          "taxa_prefixadas": 11.346,
+          "taxa_ipca": 5.8721,
+          "taxa_implicita": 5.1702
+        },
+        {
+          "vertice_du": 2394,
+          "taxa_prefixadas": 11.3625,
+          "taxa_ipca": 5.8797,
+          "taxa_implicita": 5.1783
+        },
+        {
+          "vertice_du": 2520,
+          "taxa_prefixadas": 11.376,
+          "taxa_ipca": 5.8866,
+          "taxa_implicita": 5.1842
+        },
+        {
+          "vertice_du": 2646,
+          "taxa_prefixadas": 11.3871,
+          "taxa_ipca": 5.893,
+          "taxa_implicita": 5.1883
+        },
+        {
+          "vertice_du": 2772,
+          "taxa_ipca": 5.8989
+        },
+        {
+          "vertice_du": 2898,
+          "taxa_ipca": 5.9044
+        },
+        {
+          "vertice_du": 3024,
+          "taxa_ipca": 5.9095
+        },
+        {
+          "vertice_du": 3150,
+          "taxa_ipca": 5.9142
+        },
+        {
+          "vertice_du": 3276,
+          "taxa_ipca": 5.9187
+        },
+        {
+          "vertice_du": 3402,
+          "taxa_ipca": 5.9228
+        },
+        {
+          "vertice_du": 3528,
+          "taxa_ipca": 5.9267
+        },
+        {
+          "vertice_du": 3654,
+          "taxa_ipca": 5.9303
+        },
+        {
+          "vertice_du": 3780,
+          "taxa_ipca": 5.9337
+        },
+        {
+          "vertice_du": 3906,
+          "taxa_ipca": 5.9369
+        },
+        {
+          "vertice_du": 4032,
+          "taxa_ipca": 5.9399
+        },
+        {
+          "vertice_du": 4158,
+          "taxa_ipca": 5.9427
+        },
+        {
+          "vertice_du": 4284,
+          "taxa_ipca": 5.9454
+        },
+        {
+          "vertice_du": 4410,
+          "taxa_ipca": 5.948
+        },
+        {
+          "vertice_du": 4536,
+          "taxa_ipca": 5.9504
+        },
+        {
+          "vertice_du": 4662,
+          "taxa_ipca": 5.9527
+        },
+        {
+          "vertice_du": 4788,
+          "taxa_ipca": 5.9548
+        },
+        {
+          "vertice_du": 4914,
+          "taxa_ipca": 5.9569
+        },
+        {
+          "vertice_du": 5040,
+          "taxa_ipca": 5.9588
+        },
+        {
+          "vertice_du": 5166,
+          "taxa_ipca": 5.9607
+        },
+        {
+          "vertice_du": 5292,
+          "taxa_ipca": 5.9625
+        },
+        {
+          "vertice_du": 5418,
+          "taxa_ipca": 5.9642
+        },
+        {
+          "vertice_du": 5544,
+          "taxa_ipca": 5.9658
+        },
+        {
+          "vertice_du": 5670,
+          "taxa_ipca": 5.9674
+        },
+        {
+          "vertice_du": 5796,
+          "taxa_ipca": 5.9688
+        },
+        {
+          "vertice_du": 5922,
+          "taxa_ipca": 5.9703
+        },
+        {
+          "vertice_du": 6048,
+          "taxa_ipca": 5.9716
+        },
+        {
+          "vertice_du": 6174,
+          "taxa_ipca": 5.9729
+        },
+        {
+          "vertice_du": 6300,
+          "taxa_ipca": 5.9742
+        },
+        {
+          "vertice_du": 6426,
+          "taxa_ipca": 5.9754
+        },
+        {
+          "vertice_du": 6552,
+          "taxa_ipca": 5.9766
+        },
+        {
+          "vertice_du": 6678,
+          "taxa_ipca": 5.9777
+        },
+        {
+          "vertice_du": 6804,
+          "taxa_ipca": 5.9787
+        },
+        {
+          "vertice_du": 6930,
+          "taxa_ipca": 5.9798
+        },
+        {
+          "vertice_du": 7056,
+          "taxa_ipca": 5.9808
+        },
+        {
+          "vertice_du": 7182,
+          "taxa_ipca": 5.9818
+        },
+        {
+          "vertice_du": 7308,
+          "taxa_ipca": 5.9827
+        },
+        {
+          "vertice_du": 7434,
+          "taxa_ipca": 5.9836
+        },
+        {
+          "vertice_du": 7560,
+          "taxa_ipca": 5.9845
+        },
+        {
+          "vertice_du": 7686,
+          "taxa_ipca": 5.9853
+        },
+        {
+          "vertice_du": 7812,
+          "taxa_ipca": 5.9861
+        },
+        {
+          "vertice_du": 7938,
+          "taxa_ipca": 5.9869
+        },
+        {
+          "vertice_du": 8064,
+          "taxa_ipca": 5.9877
+        },
+        {
+          "vertice_du": 8190,
+          "taxa_ipca": 5.9884
+        },
+        {
+          "vertice_du": 8316,
+          "taxa_ipca": 5.9891
+        },
+        {
+          "vertice_du": 8442,
+          "taxa_ipca": 5.9898
+        },
+        {
+          "vertice_du": 8568,
+          "taxa_ipca": 5.9905
+        },
+        {
+          "vertice_du": 8694,
+          "taxa_ipca": 5.9912
+        },
+        {
+          "vertice_du": 8820,
+          "taxa_ipca": 5.9918
+        },
+        {
+          "vertice_du": 8946,
+          "taxa_ipca": 5.9924
+        },
+        {
+          "vertice_du": 9072,
+          "taxa_ipca": 5.993
+        }
+      ],
+      "bloco3361": [
+        {
+          "vertice_du": 21,
+          "taxa": 10.3884
+        },
+        {
+          "vertice_du": 42,
+          "taxa": 10.2722
+        },
+        {
+          "vertice_du": 63,
+          "taxa": 10.1728
+        },
+        {
+          "vertice_du": 126,
+          "taxa": 9.9601
+        },
+        {
+          "vertice_du": 252,
+          "taxa": 9.8093
+        },
+        {
+          "vertice_du": 504,
+          "taxa": 10.0252
+        },
+        {
+          "vertice_du": 756,
+          "taxa": 10.4037
+        },
+        {
+          "vertice_du": 1008,
+          "taxa": 10.7293
+        },
+        {
+          "vertice_du": 1260,
+          "taxa": 10.9656
+        },
+        {
+          "vertice_du": 2520,
+          "taxa": 11.376
+        }
+      ]
+    }
+  ],
+  "mercado_secundario_TPF": [
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2024-04-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2022-01-07",
+      "taxa_compra": 10.9894,
+      "taxa_venda": 10.9595,
+      "taxa_indicativa": 10.9742,
+      "intervalo_min_d0": 10.842,
+      "intervalo_max_d0": 11.187,
+      "intervalo_min_d1": 10.8241,
+      "intervalo_max_d1": 11.1779,
+      "pu": 992.589908,
+      "desvio_padrao": 0.00222167354037,
+      "codigo_isin": "BRSTNCLTN7Y9"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2024-07-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2021-01-08",
+      "taxa_compra": 10.42,
+      "taxa_venda": 10.3985,
+      "taxa_indicativa": 10.4089,
+      "intervalo_min_d0": 10.347,
+      "intervalo_max_d0": 10.5268,
+      "intervalo_min_d1": 10.3224,
+      "intervalo_max_d1": 10.498,
+      "pu": 968.673143,
+      "desvio_padrao": 0.00721159780146,
+      "codigo_isin": "BRSTNCLTN7W3"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2024-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 7.5585,
+      "taxa_venda": 7.5232,
+      "taxa_indicativa": 7.54,
+      "intervalo_min_d0": 7.0074,
+      "intervalo_max_d0": 7.9744,
+      "intervalo_min_d1": 7.0388,
+      "intervalo_max_d1": 8.0102,
+      "pu": 4217.563267,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB096"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2024-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": -0.0252,
+      "taxa_venda": -0.0409,
+      "taxa_indicativa": -0.0351,
+      "intervalo_min_d0": -0.0712,
+      "intervalo_max_d0": -0.0186,
+      "intervalo_min_d1": -0.0692,
+      "intervalo_max_d1": -0.0167,
+      "pu": 14543.872353,
+      "desvio_padrao": 0.00251526334605,
+      "codigo_isin": "BRSTNCLF0008"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2024-10-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2022-07-08",
+      "taxa_compra": 10.0253,
+      "taxa_venda": 10.0006,
+      "taxa_indicativa": 10.013,
+      "intervalo_min_d0": 9.8699,
+      "intervalo_max_d0": 10.2658,
+      "intervalo_min_d1": 9.8188,
+      "intervalo_max_d1": 10.2117,
+      "pu": 945.854487,
+      "desvio_padrao": 0.007798885756310001,
+      "codigo_isin": "BRSTNCLTN822"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2018-02-01",
+      "taxa_compra": 9.8298,
+      "taxa_venda": 9.8001,
+      "taxa_indicativa": 9.8156,
+      "intervalo_min_d0": 9.565,
+      "intervalo_max_d0": 10.1,
+      "intervalo_min_d1": 9.5151,
+      "intervalo_max_d1": 10.0489,
+      "pu": 924.939445,
+      "desvio_padrao": 0.00322013680455,
+      "codigo_isin": "BRSTNCLTN7N2"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2014-01-10",
+      "taxa_compra": 9.8794,
+      "taxa_venda": 9.8539,
+      "taxa_indicativa": 9.867,
+      "intervalo_min_d0": 9.6151,
+      "intervalo_max_d0": 10.1445,
+      "intervalo_min_d1": 9.5688,
+      "intervalo_max_d1": 10.097,
+      "pu": 1017.061113,
+      "desvio_padrao": 0.00173205080757,
+      "codigo_isin": "BRSTNCNTF170"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2025-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": -0.0114,
+      "taxa_venda": -0.0192,
+      "taxa_indicativa": -0.0155,
+      "intervalo_min_d0": -0.0353,
+      "intervalo_max_d0": 0.0029,
+      "intervalo_min_d1": -0.0337,
+      "intervalo_max_d1": 0.0038,
+      "pu": 14543.581526,
+      "desvio_padrao": 0.00291896400629,
+      "codigo_isin": "BRSTNCLF1RC4"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-04-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2023-01-06",
+      "taxa_compra": 9.767,
+      "taxa_venda": 9.7535,
+      "taxa_indicativa": 9.7609,
+      "intervalo_min_d0": 9.5035,
+      "intervalo_max_d0": 10.1159,
+      "intervalo_min_d1": 9.4475,
+      "intervalo_max_d1": 10.0588,
+      "pu": 904.696094,
+      "desvio_padrao": 0.00139234300372,
+      "codigo_isin": "BRSTNCLTN830"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.9831,
+      "taxa_venda": 5.9464,
+      "taxa_indicativa": 5.9633,
+      "intervalo_min_d0": 5.6611,
+      "intervalo_max_d0": 6.256,
+      "intervalo_min_d1": 5.6478,
+      "intervalo_max_d1": 6.2437,
+      "pu": 4311.976847,
+      "desvio_padrao": 0.00465076503062,
+      "codigo_isin": "BRSTNCNTB633"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-07-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2022-01-07",
+      "taxa_compra": 9.7241,
+      "taxa_venda": 9.7117,
+      "taxa_indicativa": 9.7176,
+      "intervalo_min_d0": 9.4505,
+      "intervalo_max_d0": 10.1245,
+      "intervalo_min_d1": 9.3852,
+      "intervalo_max_d1": 10.0583,
+      "pu": 884.988391,
+      "desvio_padrao": 0.00064473575983,
+      "codigo_isin": "BRSTNCLTN7Z6"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2025-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.0163,
+      "taxa_venda": 0.0144,
+      "taxa_indicativa": 0.0153,
+      "intervalo_min_d0": -0.0126,
+      "intervalo_max_d0": 0.0359,
+      "intervalo_min_d1": -0.0121,
+      "intervalo_max_d1": 0.0365,
+      "pu": 14537.997656,
+      "desvio_padrao": 0.00037699359411,
+      "codigo_isin": "BRSTNCLF1RD2"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2025-10-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2023-07-07",
+      "taxa_compra": 9.7306,
+      "taxa_venda": 9.7193,
+      "taxa_indicativa": 9.725,
+      "intervalo_min_d0": 9.4394,
+      "intervalo_max_d0": 10.1617,
+      "intervalo_min_d1": 9.3737,
+      "intervalo_max_d1": 10.0955,
+      "pu": 863.659907,
+      "desvio_padrao": 0.00057430353473,
+      "codigo_isin": "BRSTNCLTN863"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2026-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2020-02-03",
+      "taxa_compra": 9.7216,
+      "taxa_venda": 9.71,
+      "taxa_indicativa": 9.7163,
+      "intervalo_min_d0": 9.3968,
+      "intervalo_max_d0": 10.1527,
+      "intervalo_min_d1": 9.3278,
+      "intervalo_max_d1": 10.083,
+      "pu": 843.664067,
+      "desvio_padrao": 0.00029680840622,
+      "codigo_isin": "BRSTNCLTN7U7"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2026-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.0335,
+      "taxa_venda": 0.0307,
+      "taxa_indicativa": 0.0324,
+      "intervalo_min_d0": 0.0145,
+      "intervalo_max_d0": 0.0649,
+      "intervalo_min_d1": 0.0141,
+      "intervalo_max_d1": 0.0653,
+      "pu": 14531.963006,
+      "desvio_padrao": 0.00067252833398,
+      "codigo_isin": "BRSTNCLF1RE0"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2026-04-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2024-01-05",
+      "taxa_compra": 9.7926,
+      "taxa_venda": 9.7795,
+      "taxa_indicativa": 9.7851,
+      "intervalo_min_d0": 9.441,
+      "intervalo_max_d0": 10.2338,
+      "intervalo_min_d1": 9.3717,
+      "intervalo_max_d1": 10.1639,
+      "pu": 823.865567,
+      "desvio_padrao": 0.00066735258297,
+      "codigo_isin": "BRSTNCLTN8B5"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2026-07-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2023-01-06",
+      "taxa_compra": 9.8452,
+      "taxa_venda": 9.8322,
+      "taxa_indicativa": 9.839,
+      "intervalo_min_d0": 9.4812,
+      "intervalo_max_d0": 10.2991,
+      "intervalo_min_d1": 9.407,
+      "intervalo_max_d1": 10.2246,
+      "pu": 804.541156,
+      "desvio_padrao": 0.00103734224825,
+      "codigo_isin": "BRSTNCLTN848"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2026-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6545,
+      "taxa_venda": 5.6219,
+      "taxa_indicativa": 5.64,
+      "intervalo_min_d0": 5.4209,
+      "intervalo_max_d0": 5.8848,
+      "intervalo_min_d1": 5.4108,
+      "intervalo_max_d1": 5.875,
+      "pu": 4279.489634,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB4U6"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2026-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.0549,
+      "taxa_venda": 0.0514,
+      "taxa_indicativa": 0.0532,
+      "intervalo_min_d0": 0.0455,
+      "intervalo_max_d0": 0.0892,
+      "intervalo_min_d1": 0.0451,
+      "intervalo_max_d1": 0.0888,
+      "pu": 14522.060361,
+      "desvio_padrao": 0.00091464278273,
+      "codigo_isin": "BRSTNCLF1RF7"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2027-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2016-01-15",
+      "taxa_compra": 9.946,
+      "taxa_venda": 9.9303,
+      "taxa_indicativa": 9.937,
+      "intervalo_min_d0": 9.5546,
+      "intervalo_max_d0": 10.3776,
+      "intervalo_min_d1": 9.4834,
+      "intervalo_max_d1": 10.3064,
+      "pu": 1018.553111,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTF1P8"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2027-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1048,
+      "taxa_venda": 0.1037,
+      "taxa_indicativa": 0.1041,
+      "intervalo_min_d0": 0.0683,
+      "intervalo_max_d0": 0.1162,
+      "intervalo_min_d1": 0.0676,
+      "intervalo_max_d1": 0.1155,
+      "pu": 14496.424001,
+      "desvio_padrao": 0.00021001252344,
+      "codigo_isin": "BRSTNCLF1RG5"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2027-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.5991,
+      "taxa_venda": 5.5658,
+      "taxa_indicativa": 5.58,
+      "intervalo_min_d0": 5.3625,
+      "intervalo_max_d0": 5.7902,
+      "intervalo_min_d1": 5.3587,
+      "intervalo_max_d1": 5.7865,
+      "pu": 4361.694051,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB682"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2027-07-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2023-07-07",
+      "taxa_compra": 10.0941,
+      "taxa_venda": 10.0816,
+      "taxa_indicativa": 10.0869,
+      "intervalo_min_d0": 9.6868,
+      "intervalo_max_d0": 10.5276,
+      "intervalo_min_d1": 9.6161,
+      "intervalo_max_d1": 10.4571,
+      "pu": 727.570191,
+      "desvio_padrao": 0.00061528157782,
+      "codigo_isin": "BRSTNCLTN871"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2027-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1238,
+      "taxa_venda": 0.1216,
+      "taxa_indicativa": 0.1226,
+      "intervalo_min_d0": 0.0955,
+      "intervalo_max_d0": 0.1347,
+      "intervalo_min_d1": 0.0945,
+      "intervalo_max_d1": 0.134,
+      "pu": 14479.381565,
+      "desvio_padrao": 0.0005252568229,
+      "codigo_isin": "BRSTNCLF1RH3"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2028-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2024-01-05",
+      "taxa_compra": 10.2507,
+      "taxa_venda": 10.2392,
+      "taxa_indicativa": 10.2449,
+      "intervalo_min_d0": 9.8478,
+      "intervalo_max_d0": 10.6809,
+      "intervalo_min_d1": 9.7824,
+      "intervalo_max_d1": 10.6156,
+      "pu": 689.125113,
+      "desvio_padrao": 0.00051809365949,
+      "codigo_isin": "BRSTNCLTN897"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2028-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1313,
+      "taxa_venda": 0.128,
+      "taxa_indicativa": 0.1293,
+      "intervalo_min_d0": 0.1208,
+      "intervalo_max_d0": 0.1464,
+      "intervalo_min_d1": 0.1199,
+      "intervalo_max_d1": 0.1453,
+      "pu": 14466.803316,
+      "desvio_padrao": 0.0005424656579,
+      "codigo_isin": "BRSTNCLF1RI1"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2028-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6037,
+      "taxa_venda": 5.5718,
+      "taxa_indicativa": 5.5894,
+      "intervalo_min_d0": 5.3748,
+      "intervalo_max_d0": 5.8061,
+      "intervalo_min_d1": 5.3787,
+      "intervalo_max_d1": 5.81,
+      "pu": 4315.041838,
+      "desvio_padrao": 0.00128359613586,
+      "codigo_isin": "BRSTNCNTB4X0"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2028-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1412,
+      "taxa_venda": 0.1377,
+      "taxa_indicativa": 0.1392,
+      "intervalo_min_d0": 0.1317,
+      "intervalo_max_d0": 0.1663,
+      "intervalo_min_d1": 0.1306,
+      "intervalo_max_d1": 0.1655,
+      "pu": 14450.895104,
+      "desvio_padrao": 0.000523843259,
+      "codigo_isin": "BRSTNCLF1RK7"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2029-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2018-01-05",
+      "taxa_compra": 10.3637,
+      "taxa_venda": 10.3496,
+      "taxa_indicativa": 10.357,
+      "intervalo_min_d0": 9.9683,
+      "intervalo_max_d0": 10.7804,
+      "intervalo_min_d1": 9.9065,
+      "intervalo_max_d1": 10.7186,
+      "pu": 1005.722299,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTF1Q6"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2029-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1612,
+      "taxa_venda": 0.1581,
+      "taxa_indicativa": 0.1595,
+      "intervalo_min_d0": 0.1531,
+      "intervalo_max_d0": 0.1703,
+      "intervalo_min_d1": 0.1524,
+      "intervalo_max_d1": 0.1695,
+      "pu": 14426.814665,
+      "desvio_padrao": 0.00059424874421,
+      "codigo_isin": "BRSTNCLF1RL5"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2029-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6194,
+      "taxa_venda": 5.59,
+      "taxa_indicativa": 5.6054,
+      "intervalo_min_d0": 5.3965,
+      "intervalo_max_d0": 5.8239,
+      "intervalo_min_d1": 5.3984,
+      "intervalo_max_d1": 5.8259,
+      "pu": 4387.767643,
+      "desvio_padrao": 0.00500069560261,
+      "codigo_isin": "BRSTNCNTB716"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2029-09-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.1717,
+      "taxa_venda": 0.1692,
+      "taxa_indicativa": 0.1704,
+      "intervalo_min_d0": 0.1624,
+      "intervalo_max_d0": 0.1804,
+      "intervalo_min_d1": 0.1617,
+      "intervalo_max_d1": 0.18,
+      "pu": 14406.471348,
+      "desvio_padrao": 0.00054997834503,
+      "codigo_isin": "BRSTNCLF1RM3"
+    },
+    {
+      "tipo_titulo": "LTN",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2030-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "100000",
+      "data_base": "2024-01-05",
+      "taxa_compra": 10.6206,
+      "taxa_venda": 10.6092,
+      "taxa_indicativa": 10.6148,
+      "intervalo_min_d0": 10.2076,
+      "intervalo_max_d0": 11.0383,
+      "intervalo_min_d1": 10.149,
+      "intervalo_max_d1": 10.9798,
+      "pu": 557.61604,
+      "desvio_padrao": 0.00052649118701,
+      "codigo_isin": "BRSTNCLTN8A7"
+    },
+    {
+      "tipo_titulo": "LFT",
+      "expressao": "Rentabilidade (% a.a.)/252",
+      "data_vencimento": "2030-03-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "210100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 0.182,
+      "taxa_venda": 0.1808,
+      "taxa_indicativa": 0.1814,
+      "intervalo_min_d0": 0.1638,
+      "intervalo_max_d0": 0.1942,
+      "intervalo_min_d1": 0.1635,
+      "intervalo_max_d1": 0.1941,
+      "pu": 14385.197386,
+      "desvio_padrao": 4.031116471e-05,
+      "codigo_isin": "BRSTNCLF1RO9"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2030-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6029,
+      "taxa_venda": 5.5733,
+      "taxa_indicativa": 5.5854,
+      "intervalo_min_d0": 5.3944,
+      "intervalo_max_d0": 5.806,
+      "intervalo_min_d1": 5.3898,
+      "intervalo_max_d1": 5.8014,
+      "pu": 4344.942435,
+      "desvio_padrao": 0.00501353833734,
+      "codigo_isin": "BRSTNCNTB3B8"
+    },
+    {
+      "tipo_titulo": "NTN-C",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2031-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "770100",
+      "data_base": "2000-07-01",
+      "taxa_compra": 5.5823,
+      "taxa_venda": 5.3553,
+      "taxa_indicativa": 5.4735,
+      "intervalo_min_d0": 5.0859,
+      "intervalo_max_d0": 5.8583,
+      "intervalo_min_d1": 5.1024,
+      "intervalo_max_d1": 5.8741,
+      "pu": 8376.216434,
+      "desvio_padrao": 0.025112116778360002,
+      "codigo_isin": "BRSTNCNTC0K4"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2031-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2020-01-10",
+      "taxa_compra": 10.602,
+      "taxa_venda": 10.5908,
+      "taxa_indicativa": 10.5963,
+      "intervalo_min_d0": 10.2041,
+      "intervalo_max_d0": 11.0099,
+      "intervalo_min_d1": 10.1452,
+      "intervalo_max_d1": 10.951,
+      "pu": 991.889158,
+      "desvio_padrao": 0.00028114784367,
+      "codigo_isin": "BRSTNCNTF204"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2032-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6914,
+      "taxa_venda": 5.6579,
+      "taxa_indicativa": 5.6762,
+      "intervalo_min_d0": 5.5143,
+      "intervalo_max_d0": 5.8958,
+      "intervalo_min_d1": 5.4971,
+      "intervalo_max_d1": 5.8787,
+      "pu": 4342.20765,
+      "desvio_padrao": 0.00667038979296,
+      "codigo_isin": "BRSTNCNTB674"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2033-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2022-01-07",
+      "taxa_compra": 10.6554,
+      "taxa_venda": 10.6399,
+      "taxa_indicativa": 10.6467,
+      "intervalo_min_d0": 10.2631,
+      "intervalo_max_d0": 11.0557,
+      "intervalo_min_d1": 10.205,
+      "intervalo_max_d1": 10.9976,
+      "pu": 984.216067,
+      "desvio_padrao": 0.00102462331127,
+      "codigo_isin": "BRSTNCNTF212"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2033-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.6893,
+      "taxa_venda": 5.6521,
+      "taxa_indicativa": 5.6714,
+      "intervalo_min_d0": 5.509,
+      "intervalo_max_d0": 5.8818,
+      "intervalo_min_d1": 5.4979,
+      "intervalo_max_d1": 5.8708,
+      "pu": 4413.417893,
+      "desvio_padrao": 0.00214952929266,
+      "codigo_isin": "BRSTNCNTB6B1"
+    },
+    {
+      "tipo_titulo": "NTN-F",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2035-01-01",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "950199",
+      "data_base": "2024-01-05",
+      "taxa_compra": 10.7319,
+      "taxa_venda": 10.7215,
+      "taxa_indicativa": 10.7262,
+      "intervalo_min_d0": 10.3495,
+      "intervalo_max_d0": 11.1358,
+      "intervalo_min_d1": 10.292,
+      "intervalo_max_d1": 11.0783,
+      "pu": 975.802639,
+      "desvio_padrao": 0.00040697050262,
+      "codigo_isin": "BRSTNCNTF238"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2035-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.717,
+      "taxa_venda": 5.6815,
+      "taxa_indicativa": 5.6987,
+      "intervalo_min_d0": 5.5401,
+      "intervalo_max_d0": 5.896,
+      "intervalo_min_d1": 5.5324,
+      "intervalo_max_d1": 5.8884,
+      "pu": 4421.876253,
+      "desvio_padrao": 0.00222130829017,
+      "codigo_isin": "BRSTNCNTB0O7"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2040-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.7417,
+      "taxa_venda": 5.7035,
+      "taxa_indicativa": 5.7225,
+      "intervalo_min_d0": 5.5709,
+      "intervalo_max_d0": 5.898,
+      "intervalo_min_d1": 5.5678,
+      "intervalo_max_d1": 5.8949,
+      "pu": 4380.397271,
+      "desvio_padrao": 0.00725122178602,
+      "codigo_isin": "BRSTNCNTB3C6"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2045-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.7937,
+      "taxa_venda": 5.756,
+      "taxa_indicativa": 5.7759,
+      "intervalo_min_d0": 5.6277,
+      "intervalo_max_d0": 5.9409,
+      "intervalo_min_d1": 5.6261,
+      "intervalo_max_d1": 5.9393,
+      "pu": 4437.967456,
+      "desvio_padrao": 0.007950786124030001,
+      "codigo_isin": "BRSTNCNTB0A6"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2050-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.805,
+      "taxa_venda": 5.77,
+      "taxa_indicativa": 5.79,
+      "intervalo_min_d0": 5.6337,
+      "intervalo_max_d0": 5.9376,
+      "intervalo_min_d1": 5.6435,
+      "intervalo_max_d1": 5.9474,
+      "pu": 4381.675761,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB3D4"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2055-05-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.7956,
+      "taxa_venda": 5.7617,
+      "taxa_indicativa": 5.78,
+      "intervalo_min_d0": 5.6257,
+      "intervalo_max_d0": 5.9243,
+      "intervalo_min_d1": 5.6357,
+      "intervalo_max_d1": 5.9342,
+      "pu": 4460.341045,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB4Q4"
+    },
+    {
+      "tipo_titulo": "NTN-B",
+      "expressao": "Taxa (% a.a.)/252",
+      "data_vencimento": "2060-08-15",
+      "data_referencia": "2024-03-05",
+      "codigo_selic": "760199",
+      "data_base": "2000-07-15",
+      "taxa_compra": 5.8246,
+      "taxa_venda": 5.7933,
+      "taxa_indicativa": 5.81,
+      "intervalo_min_d0": 5.6572,
+      "intervalo_max_d0": 5.9517,
+      "intervalo_min_d1": 5.667,
+      "intervalo_max_d1": 5.9615,
+      "pu": 4385.981143,
+      "desvio_padrao": 0,
+      "codigo_isin": "BRSTNCNTB690"
+    }
+  ],
+  "vna": [
+    {
+      "data_referencia": "2017-10-20",
+      "titulos": [
+        {
+          "tipo_titulo": "NTN-C",
+          "codigo_selic": "770100",
+          "index": 0.37,
+          "tipo_correcao": "P",
+          "data_validade": "2017-10-13",
+          "vna": 3531.425676
+        },
+        {
+          "tipo_titulo": "LFT",
+          "codigo_selic": "210100",
+          "index": 8.15,
+          "tipo_correcao": "O",
+          "data_validade": "2017-10-20",
+          "vna": 9162.202647
+        },
+        {
+          "tipo_titulo": "NTN-B",
+          "codigo_selic": "760100",
+          "index": 0.45,
+          "tipo_correcao": "P",
+          "data_validade": "2017-10-17",
+          "vna": 3013.085961
+        },
+        {
+          "tipo_titulo": "NTN-B",
+          "codigo_selic": "760199",
+          "index": 0.45,
+          "tipo_correcao": "P",
+          "data_validade": "2017-10-17",
+          "vna": 3013.085961
+        }
+      ]
+    }
+  ],
+  "estimativa_selic": [
+    {
+      "data_referencia": "2017-10-20",
+      "estimativa_taxa_selic": 8.15
+    }
+  ]
 }
