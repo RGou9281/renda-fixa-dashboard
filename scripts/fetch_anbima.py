@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 CLIENT_ID     = os.environ["ANBIMA_CLIENT_ID"]
 CLIENT_SECRET = os.environ["ANBIMA_CLIENT_SECRET"]
 
-AMBIENTE = "producao"
+AMBIENTE = "sandbox"
 BASE_URL = (
     "https://api.anbima.com.br"
     if AMBIENTE == "producao"
