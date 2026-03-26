@@ -33,8 +33,8 @@ def anbima_get(token, path):
     url = f"{BASE_URL}/feed/precos-indices/v1/titulos-publicos/{path}"
     print(f"\n  → GET {path}")
     req = Request(url, headers={
-        "access_token": token,      # ← formato ANBIMA/Sensedia
-        "client_id":    CLIENT_ID,  # ← obrigatório
+        "access_token": token,
+        "client_id":    CLIENT_ID,
         "Accept":       "application/json"
     })
     try:
@@ -120,3 +120,14 @@ if __name__ == "__main__":
         print(f"  Referência: {result['data_referencia']}")
     else:
         print("  Atenção: sem data de referência — verifique os endpoints acima")
+```
+
+Salve com **"Commit changes"**.
+
+---
+
+**Passo 2 — Rode o workflow**
+
+Acesse:
+```
+https://github.com/RGou9281/renda-fixa-dashboard/actions
