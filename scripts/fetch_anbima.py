@@ -7,7 +7,7 @@ CLIENT_ID     = os.environ["ANBIMA_CLIENT_ID"]
 CLIENT_SECRET = os.environ["ANBIMA_CLIENT_SECRET"]
 
 AMBIENTE = "sandbox"
-BASE_URL = "https://api.sandbox.anbima.com.br"
+BASE_URL = "https://api-sandbox.anbima.com.br"
 
 def get_token():
     creds   = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
