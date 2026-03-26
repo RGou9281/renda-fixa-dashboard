@@ -1,11 +1,11 @@
 import os, json, base64, datetime
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
+from urllib.parse import urlencode
 
 CLIENT_ID     = os.environ["ANBIMA_CLIENT_ID"]
 CLIENT_SECRET = os.environ["ANBIMA_CLIENT_SECRET"]
 
-# Troque para "sandbox" se quiser testar sem aprovação
 AMBIENTE = "producao"
 BASE_URL = (
     "https://api.anbima.com.br"
@@ -14,15 +14,29 @@ BASE_URL = (
 )
 
 def get_token():
-    creds   = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-    payload = b'{"grant_type":"client_credentials"}'
+    creds = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+
+    # Tenta formato form-urlencoded (padrão OAuth2 correto)
+    payload = urlencode({"grant_type": "client_credentials"}).encode()
     req = Request(
         f"{BASE_URL}/oauth/access-token",
         data=payload,
-        headers={"Content-Type": "application/json", "Authorization": f"Basic {creds}"}
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": f"Basic {creds}"
+        }
     )
-    with urlopen(req, timeout=15) as r:
-        return json.loads(r.read())["access_token"]
+    try:
+        with urlopen(req, timeout=15) as r:
+            resp = json.loads(r.read())
+            print(f"  Token obtido. Expira em: {resp.get('expires_in', '?')}s")
+            return resp["access_token"]
+    except HTTPError as e:
+        # Lê o corpo do erro para diagnóstico
+        body = e.read().decode("utf-8", errors="ignore")
+        print(f"  Falha no token — HTTP {e.code}: {e.reason}")
+        print(f"  Resposta do servidor: {body[:500]}")
+        raise
 
 def anbima_get(token, path):
     url = f"{BASE_URL}/feed/precos-indices/v1/titulos-publicos/{path}"
@@ -34,16 +48,17 @@ def anbima_get(token, path):
             print("OK")
             return data
     except HTTPError as e:
-        print(f"FALHOU — HTTP {e.code}: {e.reason}")
+        body = e.read().decode("utf-8", errors="ignore")
+        print(f"FALHOU — HTTP {e.code}: {e.reason} | {body[:200]}")
         return None
     except URLError as e:
         print(f"FALHOU — {e.reason}")
         return None
 
 def fetch_all():
-    print("Obtendo token ANBIMA...")
+    print(f"Obtendo token ANBIMA ({AMBIENTE})...")
     token = get_token()
-    print(f"Token OK. Ambiente: {AMBIENTE}\n")
+    print(f"Token OK.\n")
 
     data = {
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
@@ -51,7 +66,6 @@ def fetch_all():
         "ambiente": AMBIENTE,
     }
 
-    # Testa cada endpoint individualmente
     endpoints = [
         "curvas-juros",
         "mercado-secundario-TPF",
@@ -64,7 +78,6 @@ def fetch_all():
         if resultado:
             chave = ep.replace("-", "_").replace("/", "_")
             data[chave] = resultado
-            # Tenta extrair data de referência do primeiro endpoint bem-sucedido
             if not data["data_referencia"]:
                 if isinstance(resultado, list) and resultado:
                     data["data_referencia"] = (
@@ -77,12 +90,11 @@ def fetch_all():
                         or resultado.get("data_referencia")
                     )
 
-    # Resumo
-    ok  = [ep for ep in endpoints if ep.replace("-","_").replace("/","_") in data]
-    nok = [ep for ep in endpoints if ep.replace("-","_").replace("/","_") not in data]
-    print(f"\n✓ Endpoints OK:     {ok}")
+    ok  = [ep for ep in endpoints if ep.replace("-","_") in data]
+    nok = [ep for ep in endpoints if ep.replace("-","_") not in data]
+    print(f"\n✓ OK:     {ok}")
     if nok:
-        print(f"✗ Endpoints falhos: {nok}")
+        print(f"✗ Falhos: {nok}")
 
     return data
 
@@ -99,9 +111,7 @@ if __name__ == "__main__":
     with open(path_latest, "w") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✓ Salvo em: {path_today}")
-    print(f"✓ Atualizado: {path_latest}")
+    print(f"\n✓ Salvo: {path_today}")
+    print(f"✓ Latest: {path_latest}")
     if result.get("data_referencia"):
-        print(f"  Data de referência: {result['data_referencia']}")
-    else:
-        print("  Atenção: nenhuma data de referência encontrada nos dados")
+        print(f"  Referência: {result['data_referencia']}")
